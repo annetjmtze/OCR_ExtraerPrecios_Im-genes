@@ -235,7 +235,7 @@ Esta prueba verifica que el webhook está correctamente configurado y que Railwa
 
 Prueba de funcionamiento del bot desde una cuenta diferente a la de desarrollo.
 
-![Prueba del bot](screenshots/prueba_funciona.jpeg)
+![Prueba del bot](screenshots/prueba_funciona.png)
 
 # 👩‍💻 Autor
 
