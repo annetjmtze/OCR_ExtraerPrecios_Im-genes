@@ -1,21 +1,23 @@
-# 🚀 Bot de Telegram desplegado en Railway
+# 🚀 Dr. Ahorro Bot - WhatsApp con Twilio y OCR
 
-Proyecto desarrollado para demostrar el despliegue de una aplicación utilizando **Railway**.
+Proyecto para crear un bot de WhatsApp capaz de analizar promociones de farmacias a partir de imágenes.
 
 ## 📋 Descripción
-Este proyecto consiste en un bot de Telegram desarrollado en Python utilizando la librería `python-telegram-bot`. El bot responde a comandos básicos y consulta información sobre medicamentos mediante la API de Anthropic (Claude).
+Este proyecto consiste en un bot de WhatsApp que utiliza **Twilio** para la mensajería, **Flask** como servidor web y **Tesseract OCR** para extraer texto de imágenes. El objetivo es poder enviar una foto de una promoción de farmacia y obtener un análisis de la misma utilizando la IA de **Anthropic (Claude)**.
 
-La aplicación fue desplegada en Railway utilizando Webhooks de Telegram.
+La aplicación se prueba localmente exponiendo el servidor Flask a internet mediante **ngrok**.
 
 ---
 
 # 🛠️ Tecnologías utilizadas
 
 - Python 3.10 o superior
-- python-telegram-bot
+- Flask
+- Twilio
+- Tesseract OCR
 - Anthropic API
 - python-dotenv
-- Railway
+- Ngrok
 - Git
 - GitHub
 
@@ -23,10 +25,10 @@ La aplicación fue desplegada en Railway utilizando Webhooks de Telegram.
 
 # 📁 Estructura del proyecto
 
-```
-Deployment-Real-Railway/
+```sh
+dr-ahorro-bot/
 │── main.py
-│── requirements.txt
+│── requirements.txt # Contiene flask, twilio, etc.
 │── README.md
 │── .gitignore
 │── .env.example
@@ -41,6 +43,8 @@ Antes de comenzar es necesario tener instalado:
 - Python 3.10 o superior
 - pip
 - Git
+- Tesseract OCR
+- Ngrok
 
 Opcional:
 
@@ -48,24 +52,25 @@ Opcional:
 
 ---
 # 🔄 Funcionamiento
+El bot utiliza un webhook para recibir los mensajes enviados a través del Sandbox de Twilio para WhatsApp.
 
-El bot utiliza Webhooks para recibir los mensajes enviados por Telegram.
-
-Cuando un usuario envía un mensaje:
-
-1. Telegram envía una petición POST al endpoint `/webhook`.
-2. Railway recibe la petición.
-3. El bot procesa el mensaje.
-4. Si se utiliza el comando `/medicamento`, el bot consulta la API de Anthropic y devuelve la información obtenida.
-5. Para cualquier otro mensaje, responde repitiendo el texto recibido.
+1. Un usuario envía un mensaje de texto o una imagen al número de WhatsApp del Sandbox de Twilio.
+2. Twilio reenvía el mensaje a una URL pública (generada por **ngrok**) que apunta a nuestro servidor local.
+3. La aplicación **Flask** en `main.py` recibe la petición en el endpoint `/webhook`.
+4. Si el mensaje es una imagen, se utiliza **Tesseract OCR** para extraer el texto.
+5. El texto (ya sea del mensaje original o extraído de la imagen) se envía a la API de **Anthropic** para su análisis.
+6. La respuesta generada por la IA se formatea y se envía de vuelta al usuario a través de Twilio.
 
 ---
 # 💻 Ejecutar el proyecto localmente
 
 ## 1. Clonar el repositorio
 
+> **Nota:** Este proyecto debe estar en un repositorio privado llamado `dr-ahorro-bot`.
+
 ```bash
-git clone https://github.com/annetjmtze/Deployment-Real-Railway.git
+# Reemplaza la URL con la de tu nuevo repositorio privado
+git clone https://github.com/tu-usuario/dr-ahorro-bot.git
 ```
 
 Entrar al proyecto
