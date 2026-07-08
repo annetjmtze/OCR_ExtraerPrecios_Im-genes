@@ -1,22 +1,35 @@
 # Hallazgos de scraping - Día 2
 
-## Farmacias del Ahorro
-- **URL**: https://www.fahorro.com/paracetamol-500-mg-oral-20-tabletas.html
-- **Precio en HTML estático**: Sí
+## Resumen ejecutivo
+- **Fecha**: 2026-07-07
+- **Objetivo**: Obtener al menos un precio real de paracetamol en JSON.
+- **Resultado**: 6 registros JSON de 3 farmacias (Farmacias del Ahorro, Benavides, Probemedic).
+
+## Análisis por farmacia
+
+### Farmacias del Ahorro
+- **URL**: https://www.fahorro.com/paracetamol-500-mg-oral-20-tabletas-marca-del-ahorro.html
+- **¿Precio en HTML estático?**: Sí
+- **Método**: requests + BeautifulSoup
 - **Selector**: `[data-price-type="oldPrice"] .price`
 - **Precio**: $31.00
 
-## Farmacias Guadalajara - Problema de scraping
+### Farmacias Benavides
+- **URL**: https://www.benavides.com.mx/perfalgan-paracetamol-1-ud-frasco-ampula
+- **¿Precio en HTML estático?**: Sí (también en script GA4)
+- **Método**: requests + BeautifulSoup + extracción desde script
+- **Precio**: $918.00
 
-- **URL**: https://www.farmaciasguadalajara.com/medicina/analgesicos/paracetamol-650-mg--24-tabletas-pharmalife.-1028081.html
-- **Problema**: Timeout en todas las peticiones con `requests` (incluso con User-Agent realista y timeout de 30s).
-- **Posible causa**: Protección anti-bot (Cloudflare), bloqueo de IP o necesidad de JavaScript.
-- **Tiempo invertido**: >30 min.
-- **Decisión**: Se documenta y se pasa a la siguiente tarea, ya que se tienen precios de Farmacias del Ahorro y Benavides.
+### Probemedic
+- **URLs**: 4 productos diferentes
+- **¿Precio en HTML estático?**: Sí
+- **Método**: requests + BeautifulSoup + regex
+- **Precios**: $23.00, $48.00, $25.92, $43.00
 
-## Farmacias Benavides
-- **URL del producto**: https://www.benavides.com.mx/paracetamol-500-mg-20-tabletas (o la que uses)
-- **¿Precio en HTML estático?**: No visible en el DOM, pero sí dentro de un script con datos de GA4 (JSON).
-- **Método de extracción**: Se parsea el objeto `dl4Objects` para obtener el precio del producto principal.
-- **Selector / ubicación**: `<script>` que contiene `dl4Objects` → `ecommerce.items[0].price`.
-- **Observaciones**: El precio se extrae exitosamente desde el script. No se encontró información de promociones.
+### Farmacias Guadalajara (descartada)
+- **Problema**: Timeout en todas las peticiones (posible bloqueo anti-bot)
+- **Tiempo invertido**: >30 min
+- **Decisión**: Se aplicó la regla de los 30 minutos y se descartó.
+
+## Conclusión
+Se obtuvieron 6 precios reales de 3 farmacias diferentes, cumpliendo el objetivo.
