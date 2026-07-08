@@ -8,3 +8,6 @@ __pycache__/
 # Archivos de configuración de IDEs (opcional, pero buena práctica)
 .vscode/
 .idea/
+
+# Entorno virtual de Python
+venv/
