@@ -14,7 +14,8 @@
 - [⚙️ Instalación y Configuración](#️-instalación-y-configuración)
 - [🚀 Uso](#-uso)
 - [🌐 Web Scraping de Farmacias](#-web-scraping-de-farmacias)
-- [🔧 Variables de Entorno](#-variables-de-entorno)
+- [💾 Base de Datos de Historial de Precios](#-base-de-datos-de-historial-de-precios)
+- [ Variables de Entorno](#-variables-de-entorno)
 - [🧪 Posibles Errores y Soluciones](#-posibles-errores-y-soluciones)
 - [🚧 Mejoras Futuras](#-mejoras-futuras)
 - [🙏 Créditos](#-créditos)
@@ -28,6 +29,12 @@
 - ✅ Utiliza **Claude (Anthropic)** para interpretar consultas sobre medicamentos.
 - ✅ Obtiene precios públicos mediante **Web Scraping** desde farmacias con sitios web.
 - ✅ Guarda los resultados del scraping en formato **JSON**.
+- ✅ Almacena el historial de precios en una base de datos SQLite.
+- ✅ Consulta automáticamente los precios registrados durante las últimas 24 horas.
+- ✅ Normaliza nombres comerciales (ej. Tempra, Aspirina, Ozempic) utilizando Claude antes de consultar la base de datos.
+- ✅ Muestra un ranking de farmacias ordenado por precio.
+- ✅ Si no existen precios disponibles, responde con la ficha del medicamento y continúa buscando información.
+- ✅ Probado con usuarios reales mediante WhatsApp utilizando Twilio Sandbox.
 - ✅ Arquitectura modular y fácil de mantener.
 - ✅ Respuestas adaptadas al formato de cada plataforma.
 - ✅ Fácil de extender a nuevos canales como Discord o Messenger.
@@ -44,7 +51,7 @@
 
 | Tecnología | Uso |
 |------------|-----|
-| Python 3.14+ | Lenguaje principal |
+| Python 3.10+ | Lenguaje principal |
 | Flask | Webhook para WhatsApp |
 | Twilio API | Integración con WhatsApp |
 | python-telegram-bot | Bot de Telegram |
@@ -53,6 +60,7 @@
 | BeautifulSoup4 | Extracción de información HTML |
 | lxml | Parser HTML |
 | python-dotenv | Variables de entorno |
+| SQLite | Base de datos para historial de precios |
 | ngrok | Exposición del servidor local |
 
 ---
@@ -73,19 +81,68 @@
             │ Normalizador           │
             └─────────┬──────────────┘
                       │
-          ┌───────────┴──────────────┐
-          │                          │
-          ▼                          ▼
-   Web Scraping                 OCR
-(Requests + BS4)        (Capturas de pantalla)
-          │                          │
-          └───────────┬──────────────┘
-                      ▼
-       resultados_farmacias.json
+                      │◄────────────────────────────────────────┐
+          ┌───────────┴──────────────┐                          │
+          │                          │                          │
+          ▼                          ▼                          │
+   Web Scraping                 OCR                             │
+(Requests + BS4)        (Tesseract + Claude)                    │
+          │                          │                          │
+          └───────────┬──────────────┘                          │
+                      ▼                                         │
+            ┌──────────────────┐                                │
+            │   Base de Datos  │◄────────────────────────────────┘
+            │    (SQLite)      │
+            └──────────────────┘
                       │
                       ▼
             WhatsApp / Telegram
 ```
+---
+
+## Flujo de consulta
+
+```text
+Usuario
+   │
+   ▼
+WhatsApp / Telegram
+   │
+   ▼
+Claude normaliza el medicamento
+(Ej. "Tempra" → "Paracetamol 500 mg")
+   │
+   ▼
+Consulta SQLite
+(precios últimas 24 horas)
+   │
+   ├───────────────┐
+   │               │
+Hay precios      No hay precios
+   │               │
+   ▼               ▼
+Ranking          Ficha del medicamento
+de farmacias     + "Buscando precios..."
+```
+---
+
+# 💬 Flujo de respuesta del bot
+
+Cuando un usuario envía el nombre de un medicamento, el sistema sigue el siguiente proceso:
+
+1. Claude normaliza el nombre del medicamento.
+2. Se consulta la base de datos SQLite.
+3. Si existen precios registrados durante las últimas 24 horas:
+   - Se ordenan de menor a mayor.
+   - Se muestran promociones disponibles.
+   - Se indica cuándo fueron actualizados.
+4. Si no existen registros:
+   - Claude genera una ficha del medicamento.
+   - El bot informa que continúa buscando precios.
+
+Este flujo permite responder incluso cuando todavía no existe información de precios para un medicamento.
+
+---
 
 ### Principio de diseño
 
