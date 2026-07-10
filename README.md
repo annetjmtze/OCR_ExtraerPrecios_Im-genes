@@ -450,11 +450,11 @@ Cada análisis incluye:
 
 ## Validación con usuarios reales
 
-![Mounjaro](screenshots/mounjaro_whatsapp.jpg)
+![Mounjaro](screenshots/mounjaro_whatsapp.jpeg)
 
-![Saridon](screenshots/saridon_whatsapp.jpg)
+![Saridon](screenshots/saridon_whatsapp.jpeg)
 
-![Aspirina](screenshots/aspirina_whatsapp.jpg)
+![Aspirina](screenshots/aspirina_whatsapp.jpeg)
 
 ---
 
