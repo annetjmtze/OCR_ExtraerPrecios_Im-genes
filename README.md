@@ -459,6 +459,17 @@ Cada análisis incluye:
 - **Manejo de error 429:** El bot responde con "Alcanzamos el límite de consultas por hoy. Vuelve mañana."
 
 ---
+## Notificaciones por Telegram (límite diario)
+
+El bot de WhatsApp lleva un contador de mensajes procesados por día. Cuando se alcanza el **80% del límite diario del sandbox de Twilio** (40 de 50 conversaciones), envía una alerta al administrador por Telegram.
+
+Para habilitarlo, define en `.env`:
+- `TELEGRAM_BOT_TOKEN`: token de tu bot de Telegram (ya lo tienes).
+- `TELEGRAM_CHAT_ID`: ID del chat del administrador (obtenido con @userinfobot).
+
+Si no se configuran, la notificación simplemente se omite.
+
+---
 
 # 🧪 Posibles Errores y Soluciones
 
