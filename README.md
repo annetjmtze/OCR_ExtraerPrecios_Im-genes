@@ -448,6 +448,28 @@ Cada análisis incluye:
 | PORT | Puerto de Flask | No |
 
 ---
+## Límites de API
+
+### Twilio Sandbox (WhatsApp)
+- **Límite:** 50 conversaciones por día por número de teléfono (sandbox).
+- **Recomendación:** Monitorear el uso y considerar migrar a producción antes de superar el límite.
+
+### Anthropic Claude API
+- **Límite:** Depende del plan. Para el plan gratuito: 50 requests por minuto o 100,000 tokens por minuto (según el modelo).
+- **Manejo de error 429:** El bot responde con "Alcanzamos el límite de consultas por hoy. Vuelve mañana."
+
+---
+## Notificaciones por Telegram (límite diario)
+
+El bot de WhatsApp lleva un contador de mensajes procesados por día. Cuando se alcanza el **80% del límite diario del sandbox de Twilio** (40 de 50 conversaciones), envía una alerta al administrador por Telegram.
+
+Para habilitarlo, define en `.env`:
+- `TELEGRAM_BOT_TOKEN`: token de tu bot de Telegram (ya lo tienes).
+- `TELEGRAM_CHAT_ID`: ID del chat del administrador (obtenido con @userinfobot).
+
+Si no se configuran, la notificación simplemente se omite.
+
+---
 
 # 🧪 Posibles Errores y Soluciones
 

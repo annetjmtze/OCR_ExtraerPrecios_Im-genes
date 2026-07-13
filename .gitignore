@@ -16,3 +16,4 @@ venv/
 *.db
 *.db-journal
 data/scrapers/*.json
+daily_counter.json

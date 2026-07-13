@@ -5,6 +5,8 @@ import re
 from datetime import datetime
 import sys
 import os
+if sys.platform == 'win32':
+    sys.stdout.reconfigure(encoding='utf-8')
 
 # Añadir ruta para importar database.py desde data/
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

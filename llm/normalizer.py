@@ -21,7 +21,7 @@ class MedicamentoNormalizer:
         
         try:
             message = self.client.messages.create(
-                model="claude-haiku-4-5",
+                model="claude-haiku-4-5",   # ✅ Ya está corregido (Bug 4)
                 max_tokens=300,
                 system="""Eres un asistente experto en medicamentos en México. 
                 Da una descripción breve. Tu respuesta DEBE ser únicamente un 
@@ -42,6 +42,12 @@ class MedicamentoNormalizer:
             if response_text.endswith("```"):
                 response_text = response_text[:-3]
             return json.loads(response_text)
+        
+        # 🔥 NUEVO: Captura específica para RateLimitError (Bug 3)
+        except anthropic.RateLimitError as e:
+            logging.warning(f"Rate limit alcanzado en Anthropic: {e}")
+            return {"error": "Alcanzamos el límite de consultas por hoy. Vuelve mañana."}
+        
         except Exception as e:
             logging.error(f"Error en normalizer: {e}")
             return {"error": str(e)}
