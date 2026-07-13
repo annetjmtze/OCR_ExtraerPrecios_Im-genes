@@ -1,13 +1,15 @@
+import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import logging
-import json
 from datetime import datetime
 from flask import Flask, request, Response
 from twilio.twiml.messaging_response import MessagingResponse
 from dotenv import load_dotenv
 
 from llm.normalizer import MedicamentoNormalizer
-from db import get_resumen
+from data.database import get_resumen
 from bot.counter import increment_and_check_limit, LIMITE_DIARIO, LIMITE_NOTIFICACION
 from bot.telegram_notifier import send_telegram_message
 
