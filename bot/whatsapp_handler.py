@@ -65,11 +65,17 @@ def whatsapp_webhook():
             respuesta += "\n↩️ Escribe otro medicamento para comparar"
             msg.body(respuesta)
         else:
-            msg.body(
-                "Aún no tenemos precios para ese medicamento. "
-                "Estamos actualizando nuestra base de datos — "
-                "intenta de nuevo mañana o busca otro medicamento."
+            # 3b. No hay precios → responder inmediatamente sin prometer precios
+            ficha = (
+                f"📋 *Ficha de {nombre_ingresado}*\n\n"
+                f"• *Nombre genérico:* {resultado.get('nombre_generico', 'N/D')}\n"
+                f"• *Uso principal:* {resultado.get('uso_principal', 'N/D')}\n"
+                f"• *¿Requiere receta?:* {'Sí' if resultado.get('requiere_receta') else 'No'}\n\n"
+                "⚠️ *Aún no tenemos precios registrados para este medicamento.*\n\n"
+                "Estamos actualizando nuestra base de datos.\n"
+                "Intenta de nuevo mañana o busca otro medicamento."
             )
+            msg.body(ficha)
 
         # --- NOTIFICACIÓN TELEGRAM (3c) ---
         if increment_and_check_limit():
@@ -86,6 +92,19 @@ def whatsapp_webhook():
 
     return Response(str(resp), mimetype="application/xml")
 
+# --------------------------------------------
+#  🆕 FUNCIÓN AÑADIDA PARA QUE main.py FUNCIONE
+# --------------------------------------------
+def run_whatsapp_bot(port=5000):
+    """
+    Función que arranca el servidor Flask para recibir mensajes de WhatsApp.
+    Esta es la función que main.py está importando.
+    """
+    # debug=False evita problemas con hilos cuando usas --channel all
+    app.run(host="0.0.0.0", port=port, debug=False)
+
+
+# Este bloque se ejecuta solo si corres este archivo directamente
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
