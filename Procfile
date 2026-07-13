@@ -1,1 +1,2 @@
-web: python main.py --channel whatsapp
+web: gunicorn bot.whatsapp_handler:app
+
