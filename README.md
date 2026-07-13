@@ -448,6 +448,17 @@ Cada análisis incluye:
 | PORT | Puerto de Flask | No |
 
 ---
+## Límites de API
+
+### Twilio Sandbox (WhatsApp)
+- **Límite:** 50 conversaciones por día por número de teléfono (sandbox).
+- **Recomendación:** Monitorear el uso y considerar migrar a producción antes de superar el límite.
+
+### Anthropic Claude API
+- **Límite:** Depende del plan. Para el plan gratuito: 50 requests por minuto o 100,000 tokens por minuto (según el modelo).
+- **Manejo de error 429:** El bot responde con "Alcanzamos el límite de consultas por hoy. Vuelve mañana."
+
+---
 
 # 🧪 Posibles Errores y Soluciones
 
