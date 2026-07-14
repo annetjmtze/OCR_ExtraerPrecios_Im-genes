@@ -1,15 +1,10 @@
 import sqlite3
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
-import re  # <-- Nuevo import
+import re
+import unicodedata
 
 DB_PATH = "data/precios.db"
-
-def normalizar(texto: str) -> str:
-    """Normaliza texto para búsqueda: minúsculas y espacios simples."""
-    if not texto:
-        return ""
-    return re.sub(r'\s+', ' ', texto.strip().lower())
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -66,20 +61,34 @@ def save_precio(data: Dict[str, Any]):
     conn.commit()
     conn.close()
 
+# ---------- NUEVA FUNCIÓN DE NORMALIZACIÓN ----------
+def normalizar_texto(texto: str) -> str:
+    """
+    Convierte a minúsculas, elimina tildes y espacios múltiples.
+    Ejemplo: "DICLOFENACO 100 MG" -> "diclofenaco 100 mg"
+    """
+    texto = texto.lower().strip()
+    # Eliminar tildes (normalización Unicode)
+    texto = ''.join(c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn')
+    # Reemplazar múltiples espacios por uno solo
+    texto = re.sub(r'\s+', ' ', texto)
+    return texto
+
+# ---------- FUNCIONES DE BÚSQUEDA MODIFICADAS ----------
 def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     """
-    Busca precios para un medicamento. Usa búsqueda parcial e insensible a mayúsculas.
+    Busca precios con coincidencia parcial (insensible a mayúsculas/tildes).
     """
+    medicamento_norm = normalizar_texto(medicamento)
     fecha_limite = (datetime.now() - timedelta(hours=horas)).isoformat()
-    termino_normalizado = normalizar(medicamento)
     conn = get_connection()
     cursor = conn.cursor()
-    # Usamos LIKE con el término normalizado rodeado de '%'
+    # Usamos LOWER(medicamento) y LIKE con % alrededor para búsqueda parcial
     cursor.execute('''
         SELECT * FROM precios
         WHERE LOWER(medicamento) LIKE ? AND fecha >= ?
         ORDER BY fecha DESC
-    ''', (f'%{termino_normalizado}%', fecha_limite))
+    ''', (f'%{medicamento_norm}%', fecha_limite))
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
@@ -87,17 +96,18 @@ def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
 def get_resumen(medicamento: str) -> List[Dict[str, Any]]:
     """
     Devuelve registros de las últimas 24 horas para ese medicamento,
-    ordenados de menor a mayor precio.
+    ordenados de menor a mayor precio. (Usado por el bot en Día 5)
+    Ahora con búsqueda flexible (parcial, sin tildes, minúsculas).
     """
+    medicamento_norm = normalizar_texto(medicamento)
     fecha_limite = (datetime.now() - timedelta(hours=24)).isoformat()
-    termino_normalizado = normalizar(medicamento)
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
         SELECT * FROM precios
         WHERE LOWER(medicamento) LIKE ? AND fecha >= ?
         ORDER BY precio ASC
-    ''', (f'%{termino_normalizado}%', fecha_limite))
+    ''', (f'%{medicamento_norm}%', fecha_limite))
     rows = cursor.fetchall()
     conn.close()
     return [dict(row) for row in rows]
