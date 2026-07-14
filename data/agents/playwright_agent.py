@@ -110,6 +110,30 @@ FARMACIAS = [
         "result_container": ".product",
         "fallback_url": "https://www.farmaciasdesimilares.com/paracetamol-500-mg",
     },
+        {
+        "nombre": "Farmacias San Pablo",
+        "url": "https://www.farmaciasanpablo.com.mx/",   # página principal (puede bloquear)
+        "price_selectors": [
+            ".price-box .price",
+            ".product-price",
+            "span.price",
+            ".regular-price",
+        ],
+        "result_container": None,
+        # Sustituye por una URL de producto que muestre precio (ej. paracetamol)
+        "fallback_url": "https://www.farmaciasanpablo.com.mx/medicamentos/genericos/m---n---o---p/paracetamol-500-0-mg/p/000000000070007368",
+    },
+    {
+        "nombre": "Farmacia La Paz",
+        "url": "https://farmacialapaz.com.mx/",
+        "price_selectors": [
+            ".price-special",
+            ".product-price",
+            "span.price",
+        ],
+        "result_container": None,
+        "fallback_url": "https://farmacialapaz.com.mx/paracetamol-500-mg",
+    },
 ]
 
 def save_image(image_bytes: bytes, folder: str, filename: str) -> str:

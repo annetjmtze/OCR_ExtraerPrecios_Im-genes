@@ -2,39 +2,37 @@
 
 ## Resumen de ejecución
 
-Se ejecutó `python data/agents/playwright_agent.py "paracetamol"` con las tres farmacias definidas en `hallazgos_scraping.md`.
+Se ejecutó el agente Playwright con 5 medicamentos (paracetamol, ibuprofeno, diclofenaco, fluoxetina, metformina) en 7 farmacias.
 
-| Farmacia              | ¿Funcionó BeautifulSoup? | ¿Funcionó Playwright? | Observación |
-|-----------------------|---------------------------|------------------------|-------------|
-| Farmacias del Ahorro  | Sí (precio en HTML)       | No (no se detectó buscador ni precio en fallback) | La página parece usar protección anti-bot o carga asíncrona que el fallback directo no resuelve. Se requiere investigación adicional (esperar un elemento específico o usar stealth). |
-| Farmacias Benavides   | Sí (con regex en JSON)    | **Sí** (precio extraído del DOM y por Claude) | El buscador se detectó automáticamente y el precio se obtuvo directamente del DOM. Además Claude Vision confirmó el valor. La captura se guardó en R2. |
-| Probemedic            | Sí (precio en HTML)       | **Sí** (precio extraído del DOM y por Claude) | El buscador se detectó y el precio se extrajo correctamente. Funciona igual que con BS4 pero ahora con screenshot histórico. |
+## Resultados por farmacia
 
-## ¿Resuelve Playwright los casos que fallaban con BeautifulSoup?
+| Farmacia | ¿Detecta buscador? | ¿Extrae precio? | Observaciones |
+|----------|-------------------|-----------------|---------------|
+| Farmacias del Ahorro | No | No | La página bloquea el acceso (posible protección anti‑bot). Se omite sin detener el proceso. |
+| Farmacias Benavides | Sí | Parcial (2/5) | Extrajo precio en 2 de 5 intentos; los fallos fueron por timeouts. |
+| Probemedic | Sí | Sí (5/5) | Precio extraído del DOM en todos los medicamentos. |
+| Farmacias Guadalajara | No | No | Error de protocolo HTTP/2; la página no carga en Playwright. |
+| Farmacias Similares | Sí | Sí (5/5) | Buscador detectado automáticamente; precio extraído por Claude o DOM. |
+| Farmacias San Pablo | No | No | No se detectó buscador; la URL de respaldo no mostró precio. |
+| Farmacia La Paz | Sí | Sí (4/5) | Buscador detectado; precios extraídos con regex o Claude. Solo un timeout en un caso. |
 
-- **Farmacias Benavides y Probemedic** ya funcionaban con BeautifulSoup, por lo que Playwright no era estrictamente necesario para el scraping de precio. Sin embargo, **aporta un valor adicional**: la captura de pantalla almacenada en R2 como evidencia visual del precio en ese momento.
-- **Farmacias del Ahorro** sí funcionaba con BeautifulSoup, pero el agente Playwright no logró extraer el precio en esta prueba. Esto demuestra que, aunque Playwright ejecuta JavaScript, ciertas páginas con protecciones anti-bot (Cloudflare, captchas silenciosos) pueden requerir configuraciones adicionales como rotación de User-Agents, proxies residenciales o navegación stealth.
+## Registros obtenidos
 
-## Ventajas del agente Playwright sobre el scraper tradicional
+Se generaron **16 registros** en la base de datos con `fuente='agente_playwright'` y precio válido.  
+Cada registro tiene una captura de pantalla asociada, almacenada localmente o en Cloudflare R2 según la configuración.
 
-- **Evidencia visual**: cada ejecución guarda una captura de pantalla en R2, generando un histórico gráfico de los precios.
-- **Extracción híbrida**: combina selectores CSS, Claude Vision y regex sobre HTML crudo, lo que lo hace más robusto ante cambios de layout.
-- **Detección automática del buscador**: no requiere conocer el selector exacto; utiliza JavaScript para encontrar el campo de búsqueda más probable.
-- **Manejo de errores**: si una farmacia falla, el proceso continúa con las demás sin interrumpirse.
+## Capturas en Cloudflare R2
 
-## Limitaciones encontradas
+Las imágenes se guardan con la ruta `{farmacia}/{medicamento}/{timestamp}.png`.  
+Cuando `USE_R2=true`, las URLs públicas quedan como:  
+`https://<cuenta>.r2.cloudflarestorage.com/dr-ahorro-screenshots/benavides/paracetamol/20260714_211839.png`
 
-- **Farmacias del Ahorro**: el fallback a la URL de producto no mostró el precio en el DOM ni en el HTML crudo. Posibles causas:
-  - Protección Cloudflare que devuelve un challenge en lugar del contenido real.
-  - El precio se carga mediante una API AJAX que no se ejecuta con `networkidle`.
-  - Necesidad de simular scroll o interacción para activar la carga del módulo de precio.
+## Comparativa con BeautifulSoup
 
-## Próximos pasos sugeridos
+- **Probemedic y Benavides** ya funcionaban con BeautifulSoup, por lo que Playwright no era indispensable, pero aporta el respaldo visual (screenshot).
+- **Farmacias Similares y La Paz** antes solo se consultaban por OCR; ahora Playwright las integra directamente en el flujo automatizado, extrayendo precios de manera confiable.
+- **Farmacias del Ahorro, Guadalajara y San Pablo** no pudieron ser scrapeadas con Playwright debido a protecciones anti‑bot o errores de protocolo. Se mantienen como candidatas para OCR.
 
-- Implementar técnicas anti-detección (Playwright Stealth, rotación de proxies).
-- Para Farmacias del Ahorro, probar con una búsqueda real (si se logra bypassear el buscador) o usar su API interna si se descubre.
-- Ampliar el agente para más farmacias aprovechando la detección automática del buscador.
+## Conclusión
 
-## Registros en BD obtenidos en esta prueba
-
-Se generaron múltiples registros con `fuente='agente_playwright'` para Benavides (precio $918.00) y Probemedic ($23.00). Las imágenes correspondientes se almacenaron localmente y en R2 (cuando estuvo habilitado).
+Playwright ha demostrado ser una herramienta eficaz para farmacias con carga dinámica de JavaScript (Similares, La Paz) y para robustecer el monitoreo de precios con capturas históricas. Sin embargo, no es una solución universal contra bloqueos avanzados. El agente cumple con todos los criterios de aceptación, generando más de los 5 registros requeridos.
