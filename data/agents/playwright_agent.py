@@ -85,6 +85,31 @@ FARMACIAS = [
         "result_container": ".product",
         "fallback_url": None,
     },
+    # ── NUEVAS FARMACIAS ────────────────────────────────
+    {
+        "nombre": "Farmacias Guadalajara",
+        "url": "https://www.farmaciasguadalajara.com/",
+        "price_selectors": [
+            ".price-special",       # precio de oferta
+            ".product-price",
+            "span.price",
+            ".regular-price",
+        ],
+        "result_container": ".product-item:first-child",
+        # Sustituye por una URL real de producto que muestre precio
+        "fallback_url": "https://www.farmaciasguadalajara.com/paracetamol-500mg-20-tabletas",
+    },
+    {
+        "nombre": "Farmacias Similares",
+        "url": "https://www.farmaciasdesimilares.com/",
+        "price_selectors": [
+            ".price-box .price",
+            ".price",
+            ".product-price",
+        ],
+        "result_container": ".product",
+        "fallback_url": "https://www.farmaciasdesimilares.com/paracetamol-500-mg",
+    },
 ]
 
 def save_image(image_bytes: bytes, folder: str, filename: str) -> str:
