@@ -44,5 +44,28 @@ def increment_and_check_limit() -> bool:
     _save_counter(data)
     return should_notify
 
-# Exportar constantes para usarlas en otros módulos
-__all__ = ['increment_and_check_limit', 'LIMITE_DIARIO', 'LIMITE_NOTIFICACION']
+# ---------- NUEVAS FUNCIONES ----------
+def is_limit_reached() -> bool:
+    """
+    Retorna True si ya se alcanzó el límite diario (sin incrementar).
+    """
+    today = _get_today_str()
+    data = _load_counter()
+    if data["date"] != today:
+        return False
+    return data["count"] >= LIMITE_DIARIO
+
+def get_remaining() -> int:
+    """
+    Retorna cuántos mensajes quedan disponibles hoy.
+    """
+    today = _get_today_str()
+    data = _load_counter()
+    if data["date"] != today:
+        return LIMITE_DIARIO
+    remaining = LIMITE_DIARIO - data["count"]
+    return remaining if remaining > 0 else 0
+
+# Exportar constantes y funciones
+__all__ = ['increment_and_check_limit', 'is_limit_reached', 'get_remaining', 
+           'LIMITE_DIARIO', 'LIMITE_NOTIFICACION']

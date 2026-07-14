@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 from llm.normalizer import MedicamentoNormalizer
 from data.database import get_resumen, init_db, save_precio
-from bot.counter import increment_and_check_limit, LIMITE_DIARIO, LIMITE_NOTIFICACION
+from bot.counter import increment_and_check_limit, is_limit_reached, LIMITE_DIARIO, LIMITE_NOTIFICACION
 from bot.telegram_notifier import send_telegram_message
 
 load_dotenv()
@@ -104,6 +104,13 @@ def whatsapp_webhook():
         sender = request.form.get("From", "desconocido")
         logging.info(f"Mensaje de {sender}: {incoming_msg}")
 
+        # ---------- VERIFICAR LÍMITE DIARIO ----------
+        if is_limit_reached():
+            msg.body("Alcanzamos el límite de consultas por hoy. Vuelve mañana.")
+            logging.warning(f"Límite diario alcanzado, rechazando mensaje de {sender}")
+            return Response(str(resp), mimetype="application/xml")
+        # --------------------------------------------
+
         if not incoming_msg:
             msg.body("Por favor, envía el nombre de un medicamento.")
             return Response(str(resp), mimetype="application/xml")
@@ -128,6 +135,7 @@ def whatsapp_webhook():
             precios = get_resumen(nombre_ingresado.lower())
 
         if precios:
+            # ---- Construir respuesta con precios ----
             respuesta = f" *{nombre_generico.title()}*\n\n"
             respuesta += " *Precios en farmacias:*\n"
             for i, p in enumerate(precios, 1):
@@ -148,14 +156,16 @@ def whatsapp_webhook():
             respuesta += "\n↩️ Escribe otro medicamento para comparar"
             msg.body(respuesta)
         else:
-            # 3b. No hay precios → mensaje de fallback (Bug 1)
-            msg.body(
-                "Aún no tenemos precios para ese medicamento. "
-                "Estamos actualizando nuestra base de datos — "
-                "intenta de nuevo mañana o busca otro medicamento."
-            )
+            # ---- No hay precios → mostrar ficha del medicamento ----
+            ficha = f"📋 *Ficha de {nombre_ingresado.title()}*\n\n"
+            ficha += f"*Nombre genérico:* {resultado.get('nombre_generico', 'No disponible')}\n"
+            ficha += f"*Uso principal:* {resultado.get('uso_principal', 'No disponible')}\n"
+            receta = "Sí" if resultado.get('requiere_receta') else "No"
+            ficha += f"*¿Requiere receta?* {receta}\n"
+            ficha += "\n⚠️ Aún no tenemos precios para este medicamento. Estamos actualizando nuestra base de datos — intenta de nuevo mañana o busca otro medicamento."
+            msg.body(ficha)
 
-        # --- NOTIFICACIÓN TELEGRAM (3c) ---
+        # --- NOTIFICACIÓN TELEGRAM (80%) ---
         if increment_and_check_limit():
             mensaje = (
                 f"⚠️ *Dr. Ahorro* — Límite diario al 80%\n"
@@ -166,7 +176,11 @@ def whatsapp_webhook():
 
     except Exception as e:
         logging.error(f"Error crítico en webhook: {e}", exc_info=True)
-        msg.body("Ocurrió un error, intenta de nuevo.")
+        # Si es error de rate limit de Twilio, mensaje específico
+        if "429" in str(e) or "Too Many Requests" in str(e):
+            msg.body("Alcanzamos el límite de consultas por hoy. Vuelve mañana.")
+        else:
+            msg.body("Ocurrió un error, intenta de nuevo.")
 
     return Response(str(resp), mimetype="application/xml")
 
