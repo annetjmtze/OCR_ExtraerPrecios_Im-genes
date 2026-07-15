@@ -87,19 +87,6 @@ FARMACIAS = [
     },
     # ── NUEVAS FARMACIAS ────────────────────────────────
     {
-        "nombre": "Farmacias Guadalajara",
-        "url": "https://www.farmaciasguadalajara.com/",
-        "price_selectors": [
-            ".price-special",       # precio de oferta
-            ".product-price",
-            "span.price",
-            ".regular-price",
-        ],
-        "result_container": ".product-item:first-child",
-        # Sustituye por una URL real de producto que muestre precio
-        "fallback_url": "https://www.farmaciasguadalajara.com/paracetamol-500mg-20-tabletas",
-    },
-    {
         "nombre": "Farmacias Similares",
         "url": "https://www.farmaciasdesimilares.com/",
         "price_selectors": [
