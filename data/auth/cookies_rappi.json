@@ -1,0 +1,932 @@
+[
+  {
+    "name": "Path",
+    "value": "/",
+    "domain": "www.rappi.com.mx",
+    "path": "/_next/static/chunks/pages/new/login",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "Path",
+    "value": "/",
+    "domain": "www.rappi.com.mx",
+    "path": "/_next/static/12OLGmLMMoGWtmAzOoWJa",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "Path",
+    "value": "/",
+    "domain": "www.rappi.com.mx",
+    "path": "/_next/static/chunks/pages/new",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "Path",
+    "value": "/",
+    "domain": "www.rappi.com.mx",
+    "path": "/_next/static/chunks/pages",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "Path",
+    "value": "/",
+    "domain": "www.rappi.com.mx",
+    "path": "/_next/static/chunks",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "Path",
+    "value": "/",
+    "domain": "www.rappi.com.mx",
+    "path": "/_next/static/media",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "Path",
+    "value": "/",
+    "domain": "www.rappi.com.mx",
+    "path": "/_next/static/css",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "Path",
+    "value": "/",
+    "domain": "www.rappi.com.mx",
+    "path": "/styles",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "guestAuthVersion",
+    "value": "2",
+    "domain": "www.rappi.com.mx",
+    "path": "/",
+    "expires": 1784146428.383072,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "deviceid",
+    "value": "92f9ab84-e3b1-49ce-941f-494362c8605b",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702777.343018,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "Path",
+    "value": "/",
+    "domain": "www.rappi.com.mx",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "AMP_MKTG_101be7b7fd",
+    "value": "JTdCJTdE",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1815678777,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ttp",
+    "value": "3GYJXBemKmvWLJDwpBlZFNXWUdO",
+    "domain": ".tiktok.com",
+    "path": "/",
+    "expires": 1817838828.149183,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_fbp",
+    "value": "fb.2.1784142777965.93196312952538869",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1791918828,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_twpid",
+    "value": "tw.1784142777984.377915380137170022",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1817838777.994721,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Strict"
+  },
+  {
+    "name": "_gcl_au",
+    "value": "1.1.47803079.1784142778",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1791918778,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "guest_id_marketing",
+    "value": "v1%3A178414260540858049",
+    "domain": ".twitter.com",
+    "path": "/",
+    "expires": 1818702778.174812,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "guest_id_ads",
+    "value": "v1%3A178414260540858049",
+    "domain": ".twitter.com",
+    "path": "/",
+    "expires": 1818702778.174883,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "personalization_id",
+    "value": "\"v1_lxeR3KwcIvmq9ixiXPHw2g==\"",
+    "domain": ".twitter.com",
+    "path": "/",
+    "expires": 1818702778.174913,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "guest_id",
+    "value": "v1%3A178414260540858049",
+    "domain": ".twitter.com",
+    "path": "/",
+    "expires": 1818702778.17494,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "__cf_bm",
+    "value": "DXFILGBQYK72XK1jAd5fVRhV8b0tzo7urvqKT7q9TdU-1784142605.3642578-1.0.1.1-Mbw3jVWD.sWt3JHAzULaDooKW8RIjFA5tXeaUw35gNfeMLhD68XJZCwQll6.qSJzWkKs9eqWFMkPptTJRM9G0WcD1h6mDmm9lturD8bjcNeUUvPFljeY7C9CqB3OIF.V",
+    "domain": ".twitter.com",
+    "path": "/",
+    "expires": 1784144578.174968,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "muc_ads",
+    "value": "9f48d53d-c24f-4fab-ab1b-2211d2e1159b",
+    "domain": ".t.co",
+    "path": "/",
+    "expires": 1818702778.249382,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "__cf_bm",
+    "value": "DacYcaQkqCF2W2i_wRt89jO19__M8Vmx385iOoJjn14-1784142605.429754-1.0.1.1-nPfNNwEHq0FpaNYBx91V.aoMgNeMNj2ZcpX_CUybJRfdMSL2yDpsx4qY88MbiqWLpJO.V2ewPO31BEKRfOTEnLUXRltsRBHV33XRGi5dmUV7bEBYYAbK8bljJTN0ZEsC",
+    "domain": ".t.co",
+    "path": "/",
+    "expires": 1784144578.249522,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_gid",
+    "value": "GA1.3.1354212216.1784142778",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1784229228,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_gat_UA-64467188-13",
+    "value": "1",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1784142838,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_gat_UA-64467188-4",
+    "value": "1",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1784142838,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "tfpsi",
+    "value": "8e25b2a4-a2e5-4f21-ad67-b3b309e0962c",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1784144628.203094,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_tt_enable_cookie",
+    "value": "1",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1817838828,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ttp",
+    "value": "01KXKK4MB0WVVPG82FV0VH9NJK_.tt.2",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1817838828,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "IDE",
+    "value": "AHWqTUk23cLT7RRqyEwv6dv1vk1shqDJfbp_wgFH-iDAqdHPbmXcA3tGQWd9l1zR",
+    "domain": ".doubleclick.net",
+    "path": "/",
+    "expires": 1818702778.969817,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_hjSession_1812182",
+    "value": "eyJpZCI6ImVkNzEyN2I5LTNlYjktNDhkZC04YzJmLWYxMGUzMTU3ODU0ZCIsImMiOjE3ODQxNDI3NzkwMTgsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1784144609,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "af_id",
+    "value": "dab59409-a563-4fe0-a175-8f3bcf31dd47-p",
+    "domain": ".appsflyersdk.com",
+    "path": "/",
+    "expires": 1818270828.226925,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "afUserId",
+    "value": "dab59409-a563-4fe0-a175-8f3bcf31dd47-p",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702828.250107,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "af_id",
+    "value": "dab59409-a563-4fe0-a175-8f3bcf31dd47-p",
+    "domain": ".onelink.me",
+    "path": "/",
+    "expires": 1818270779.229896,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "AF_SYNC",
+    "value": "1784142779231",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1784747579,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "MUID",
+    "value": "28A915843E16625611E702133F6F6370",
+    "domain": ".bing.com",
+    "path": "/",
+    "expires": 1817838779.676469,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "MR",
+    "value": "0",
+    "domain": ".bat.bing.com",
+    "path": "/",
+    "expires": 1784747579.676609,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "NID",
+    "value": "533=dyqZEDVtUdhv7Jj96NtgP_s_44Yu6NAwva31bA-FUBqVyPWMOKD7GafukZa31w-vXAFl8PncecxrgtdaoMp-wDWsjSDXrahSKIrtvSp9enMDDGN-_ELoVL_4nJN87EqxFstlrJXYShLpq6ME7HCKVSaENIlJ8g25rzlWeXXtXXpjHAu9H7kNf-xqXpFHoLz4vz0c4wGhimqlQMQ0d7cI4B9jiEhdX1p17Hn8g0P-pLnEH12bIJ-3Kpq2emd9IrN-DstL7J9P1qXLocxjB23mwqduWdHy-pLR3rAU3_nnfVyAeJw1L3UEmWwEb9DOf2TCiK7-weFvIojindJEIGFaEAIrq0TcbcdrHQZ34uuPtk7NYbVkVIYcMp3u5pQY_z8l4ubR958oR8GDrYPJMZbVZOaeT17ylWm-owAm4qVKp-cCUpqxPY8UO_qRb88L-1BNtG4AF7DJ4GHqJ-nETrI8MiRQ6GJnc-1jTGbJWrrAFKC-2bwkTpsWvOsm-VDO3FRdzsmzlqCQu5O5AtBvsxWd35sDNwCeMucM1bvmx-MAea5EPoKVXl30kFP1-TekELr2IJdiFAE3HWLOi3TLZnfRv8dCi9H6bVD6JQitZH54PoAcjdxOxFOOThEOadEDWzw",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1799953982.235728,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "HSID",
+    "value": "Age9vNkAJcZuIT-W2",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818702822.236043,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SSID",
+    "value": "AaKwj5iNziA_j_mMQ",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818702822.236071,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "APISID",
+    "value": "uUWOmSuo_IVy5G7U/A6MKFa63cQrvo50sV",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818702822.236097,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SAPISID",
+    "value": "rmE3MgMFMQV3RgG2/APCevoR6kRJs-b4Hv",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818702822.236159,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PAPISID",
+    "value": "rmE3MgMFMQV3RgG2/APCevoR6kRJs-b4Hv",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818702822.2362,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PAPISID",
+    "value": "rmE3MgMFMQV3RgG2/APCevoR6kRJs-b4Hv",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818702822.236231,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "LSID",
+    "value": "s.MX:g.a000_wgMb3pwUPHoLJo2TkLsdu8xJ5MahJ3PijIA3RL9aZyKjNHtCj_e8MwRyW4pRHKli5r_dgACgYKAeUSARESFQHGX2Mip8_FHxd_7qVXjvLZ3a90tBoVAUF8yKprdGDMBeAlKf6m5EFMtlKy0076",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818702822.344096,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Host-1PLSID",
+    "value": "s.MX:g.a000_wgMb3pwUPHoLJo2TkLsdu8xJ5MahJ3PijIA3RL9aZyKjNHtTc3V9phJfqBof0Kic0NNSQACgYKASUSARESFQHGX2MipNRiYbyWvqNas5vZNBvLyhoVAUF8yKqCbg_RDjPc6K1BaTONfidg0076",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818702822.34423,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Host-3PLSID",
+    "value": "s.MX:g.a000_wgMb3pwUPHoLJo2TkLsdu8xJ5MahJ3PijIA3RL9aZyKjNHtnmezd89Ikc8xCZ8VWS9-QQACgYKAckSARESFQHGX2MiNZi03BfKp3w5x2w6gqmvQxoVAUF8yKrtzZ5CLc084ZWSf9byroqY0076",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818702822.344285,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "ACCOUNT_CHOOSER",
+    "value": "AFx_qI6lRnxmVrveZcTXUSjRovg_5gt9y-wgtSJnNrE_jf3N6Xv6umYTYciyrziXbbqrhzwN3gVuqkTA8jPP3dcfQZUMGuaqs4k5jOI2uYZIryiYVPuzNxmpJLLS9TgNx-Dfu0mid6hnSMt291fLaAdw4fjtT9aA0A",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818702822.344337,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SID",
+    "value": "g.a000_wgMbw6pQ2MQ3_k7uedusfbtWXT1zmd6v0bg4WkPCb0il3gEliaKFjSqXGwNTDOJ0J2NIQACgYKAUQSARESFQHGX2MiybA2rRGWjSLFkIVznh7KmhoVAUF8yKrQpCBXJOrVkQdhoIQeGizM0076",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818702822.489856,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PSID",
+    "value": "g.a000_wgMbw6pQ2MQ3_k7uedusfbtWXT1zmd6v0bg4WkPCb0il3gEW8UxF3jC9PTN_urG_2x96wACgYKAY4SARESFQHGX2Mi-y2J3vhwD8w06FibuFfpBBoVAUF8yKoh-YzNYDxLVNGOV9EL48Up0076",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818702822.48991,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PSID",
+    "value": "g.a000_wgMbw6pQ2MQ3_k7uedusfbtWXT1zmd6v0bg4WkPCb0il3gEZ_rU3ShLNLEEUt0aqnQReQACgYKAR0SARESFQHGX2MirFMTeo4uanLpyW3OufZ4SRoVAUF8yKqIg22Hcst07kqZCEQUHtni0076",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818702822.489961,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "HSID",
+    "value": "A0Nw3soc5Gawlc1RF",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818702822.52346,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SSID",
+    "value": "AowK70y1uttbjdwn9",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818702822.523558,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "APISID",
+    "value": "uUWOmSuo_IVy5G7U/A6MKFa63cQrvo50sV",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818702822.523591,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SAPISID",
+    "value": "rmE3MgMFMQV3RgG2/APCevoR6kRJs-b4Hv",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818702822.523621,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PAPISID",
+    "value": "rmE3MgMFMQV3RgG2/APCevoR6kRJs-b4Hv",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818702822.523647,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PAPISID",
+    "value": "rmE3MgMFMQV3RgG2/APCevoR6kRJs-b4Hv",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818702822.523676,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "NID",
+    "value": "533=c1u461naejm4afXoa1t8V9066AG8LeDQ2C9p6LjjyNiITzcjxqljxp8UNlOhAfm7DZuASyRnFb-1x6iHst17AuyqOzuR-eK5cUbXtH9HgFqXWRYSNkWdiFyymDpf8-0h26hp1TcR4BcSG14p9LqA99tFKJFM9R6J2V_zi72v65GsWVt05gFZwyKDPa7iPkM6pGQUWi-yFn2JxnN3jw",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1799954022.523713,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "SID",
+    "value": "g.a000_wgMb_9I4MAX4JZ1xKPAMQzg_71h8A587smSa_8bVnxRrIr0fUGj1HJelBkAxaEivQ4yuAACgYKAesSARESFQHGX2MiI6vbzh2ldARY8PHP7K_EPxoVAUF8yKrXn73KbGoD2iI71fAQbdor0076",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818702822.523755,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PSID",
+    "value": "g.a000_wgMb_9I4MAX4JZ1xKPAMQzg_71h8A587smSa_8bVnxRrIr06ZiVfVS_3CpgIb8rxzA-4gACgYKAfESARESFQHGX2MieMc4_8SKY65mrgW3xuT8khoVAUF8yKoWoCBTstbBfLzXyZjqtP9v0076",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818702822.523787,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PSID",
+    "value": "g.a000_wgMb_9I4MAX4JZ1xKPAMQzg_71h8A587smSa_8bVnxRrIr0NtgQr3Nj-1eWC9hOaopZPAACgYKAagSARESFQHGX2MiBR2So6pO0WWUUntDI2twdBoVAUF8yKof_j0AxG1bcGoaQ_ecOMKH0076",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818702822.523816,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "__Secure-1PSIDTS",
+    "value": "sidts-CjYBPWEu2aDv_19WAqJzJy3jA9GnQK1E0MZ2z4dDzXrNIQp3XwurrSyEQ87ddmNJOK4VKa5mZtUQAA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815678822.68069,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PSIDRTS",
+    "value": "sidts-CjYBPWEu2aDv_19WAqJzJy3jA9GnQK1E0MZ2z4dDzXrNIQp3XwurrSyEQ87ddmNJOK4VKa5mZtUQAA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1784143422.680818,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PSIDTS",
+    "value": "sidts-CjYBPWEu2aDv_19WAqJzJy3jA9GnQK1E0MZ2z4dDzXrNIQp3XwurrSyEQ87ddmNJOK4VKa5mZtUQAA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815678822.680879,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "__Secure-3PSIDRTS",
+    "value": "sidts-CjYBPWEu2aDv_19WAqJzJy3jA9GnQK1E0MZ2z4dDzXrNIQp3XwurrSyEQ87ddmNJOK4VKa5mZtUQAA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1784143422.680935,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "__Host-GAPS",
+    "value": "1:vJO6c3O4G5c14c5izCM9UQTM4HucDqYTIHS8md3Owt-E8NTfQw0uH6fQCULoVXOEN395CybXilaojBRv3cy-ay_k3ZgViIELDiD1eFheA0zx7N3YKQxtrAxUSE5ATLCrjJ4J5IW1keG4vUqXxjJt8d9fp7sJhChmWEJpsfsArX1gFxzLl1tsVw:RY1EwSEts1gOuvBy",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818702822.706731,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Host-GAPSTS",
+    "value": "gapsts-CiwBtKsiLMlKYY2KRCgpplQQL6davmDGin7krEuk_e3TYTNmJtVTcscQC8NFXBAB",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818702822.886267,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "g_state",
+    "value": "{\"i_l\":0,\"i_ll\":1784142780933,\"i_e\":{\"enable_itp_optimization\":24},\"i_et\":1784142780933}",
+    "domain": "www.rappi.com.mx",
+    "path": "/",
+    "expires": 1799694823,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SIDCC",
+    "value": "AKEyXzUDFbm1_ix2y3d8N0GwItX1RB3yWNdl27gzS51BF0gxdUCE_sVTKadNaet8hEHLzd_s",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815678823.364842,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PSIDCC",
+    "value": "AKEyXzUG-TEfUs-gaNH2ywr3-nCOxQXJSRkuOeI9lRXNqmeX6IikrIG2PyoqfnYGUEo6TMWoVg",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815678823.364967,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "rappi.id",
+    "value": "eyJhY2Nlc3NfdG9rZW4iOiJmdC5nQUFBQUFCcVY5czdsYUJSWDlpelRza3dRVHQ1a1QzM2tvRjdYamtDVkRmS2xfX3g2VmJ0WTNiRXo5QkpsWHNMZkQzNU1XREctU2g1VThaalZqTmJ1U0szLVlRc1RGN3kyYW1CS0h2WGJ4T19HVEpPVy1ER01aTFRTMWFjNk9rVEJqd1I3TWtVVWtLZmxZb2JRWTU1RGtSUEVtd3pGenlRTEdId2tJLW1KclMwd0dWVVI3cE5WazVDQ0cwZjdCUzFfZ1E2VV9uZnRfemlwa19tSEd6Tkl0U2tWLXhGVkVVQmFzTnRNbWMxclVaUy1rbk85U0J0U2JfT3lJcXJ5TU55aWc2cGxGZnZobGpNWmtuOFNXZ0ozZ19HUi1XUFN6cWU5UURBMjQ2eXB6Z01La1E5T3VCM1VsdnU2NmNSNVN4OWJ2OTRxdy02Y1NTWmhjcnpLV0RfaGVEUTB2VWd2bUhpR3gxek1iaHVXdVpXcXduVkJoQjdxZC1CVXQ3R25feXljRnVDNTRBTUJOY19xNEVJVHk0S0l0bnlrMTcxdnRTcHlnPT0iLCJ0b2tlbl90eXBlIjoiQmVhcmVyIiwiZXhwaXJlc19pbiI6NjA0ODAwLCJyZWZyZXNoX3Rva2VuIjoiZnQuZ0FBQUFBQnFWOXM3MjNTTHg1VFlmNk9mTVBpZGYzZURvTUhEc19iWVliRGNHUDFLaTUwVmd4OU9PbTdjNm8wNDg5RGRQZWVIMWg2bVFlTlRHTzBNX1NvX19HNjlneWx0b1Z0MnRfNFhCbnBQOUNTQ2pmN3NocEl4TFNFdjFfNFRVSWJhS1hkZDdvOEVNMzJWS01XckFzQXp4NnZockZ3aFUtNzUwOHlJWWRnUjdmM1MzSzZXdTlhLU9aYkNhalJoNUV3OW5uMUREZVBfc3BVa01mbUR3ejVsV0xJb2JQZldRZGdRZ2lXaDRVSUZVUVIyeFhpTGpvRTByaHNwNXEzWUlFY2lsZVVla29jNWhYSGpuMlRwRUc5dDZGSWhab1I5b181cmxfSHcxRUd4d2JoWEVWRE5LSTlEcC14cC0wa09wRGZ0WF9PVDJOMU1OYzdFZkpuLUh6SlFXMnY5T3g4SllFWXRnTTh0MVBSWjJvUFNXTkdvcnlpRUpJQWdUb2tFWEQwOVhNZzBBa2pGelRYQmYzUjJneFYwV0xuRzVPYk1IUT09IiwiZmlyc3RfbG9naW4iOmZhbHNlfQ==",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1792026833.739864,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "rappi.type",
+    "value": "1",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1792026833.740004,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "rappi_refresh_token",
+    "value": "ZnQuZ0FBQUFBQnFWOXM3MjNTTHg1VFlmNk9mTVBpZGYzZURvTUhEc19iWVliRGNHUDFLaTUwVmd4OU9PbTdjNm8wNDg5RGRQZWVIMWg2bVFlTlRHTzBNX1NvX19HNjlneWx0b1Z0MnRfNFhCbnBQOUNTQ2pmN3NocEl4TFNFdjFfNFRVSWJhS1hkZDdvOEVNMzJWS01XckFzQXp4NnZockZ3aFUtNzUwOHlJWWRnUjdmM1MzSzZXdTlhLU9aYkNhalJoNUV3OW5uMUREZVBfc3BVa01mbUR3ejVsV0xJb2JQZldRZGdRZ2lXaDRVSUZVUVIyeFhpTGpvRTByaHNwNXEzWUlFY2lsZVVla29jNWhYSGpuMlRwRUc5dDZGSWhab1I5b181cmxfSHcxRUd4d2JoWEVWRE5LSTlEcC14cC0wa09wRGZ0WF9PVDJOMU1OYzdFZkpuLUh6SlFXMnY5T3g4SllFWXRnTTh0MVBSWjJvUFNXTkdvcnlpRUpJQWdUb2tFWEQwOVhNZzBBa2pGelRYQmYzUjJneFYwV0xuRzVPYk1IUT09",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1792026833.740073,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "rappi.data",
+    "value": "eyJpZCI6MjE1Mzg1MTU5OSwiZmlyc3ROYW1lIjoiRHIuIEFob3JybyIsImxhc3ROYW1lIjoiQm90IiwiZ2VuZGVyIjoiIiwiaWRlbnRpZmljYXRpb25UeXBlIjoxLCJpZGVudGlmaWNhdGlvbiI6bnVsbCwiZW1haWwiOiJkcmFob3Jyby5hZ2VudGVAZ21haWwuY29tIiwiZGVmYXVsdENjIjpudWxsLCJsYXN0UHVzaEN1c3RvbSI6bnVsbCwiYmlydGhkYXkiOm51bGwsInJlcGxhY2VtZW50Q3JpdGVyaWFJZCI6bnVsbCwicmVmZXJlZENvZGUiOm51bGwsInBob25lIjpudWxsLCJyZW1lbWJlclRva2VuIjpudWxsLCJpc1Bob25lQ29uZmlybWVkIjpmYWxzZSwiY2NCbG9ja2VkIjpmYWxzZSwiZGV2aWNlSWQiOiI5MmY5YWI4NC1lM2IxLTQ5Y2UtOTQxZi00OTQzNjJjODYwNWIiLCJibG9ja2VkIjpmYWxzZSwiZXhpdG9JZCI6bnVsbCwiZXhpdG9Mb3lhbHR5VHlwZSI6bnVsbCwiYXBwbGljYXRpb24iOiJyYXBwaSIsInZpcCI6ZmFsc2UsInBheXBhbEJsb2NrZWQiOmZhbHNlLCJzdGF0dXNGcmF1ZCI6Im5vdF92ZXJpZmllZCIsImluc3RhbGxtZW50cyI6MSwiY291bnRyeUNvZGUiOm51bGwsInNvY2lhbFByb3ZpZGVyIjoiZ29vZ2xlIiwibmFtZSI6IkRyLiBBaG9ycm8gQm90IiwicGljIjoiIiwicmFwcGlDcmVkaXRzIjoiMCIsInJhcHBpQ3JlZGl0QWN0aXZlIjpmYWxzZSwiZ212IjowLCJjcmVhdGVkQXQiOiIyMDI2LTA3LTE0IDIyOjUxOjIxIiwiYWN0aXZlQWRkcmVzcyI6bnVsbCwibG95YWx0eSI6eyJpZCI6LTEsIm5hbWUiOiIiLCJkZXNjcmlwdGlvbiI6Ik5pdmVsIEJyb25jZSIsInR5cGUiOiJicm9uemUiLCJzdGFydENvbG9yIjoiI0NFNUQwNyIsImVuZENvbG9yIjoiI0ZGOTUzMiIsImltYWdlIjoiIiwiYWN0aXZlIjp0cnVlLCJ0b3RhbFBvaW50cyI6MCwicGVyaW9kIjp7ImlkIjoxLCJhY3RpdmUiOnRydWUsImVuZHNBdCI6IjIwMjYtMTAtMTVUMTM6MTA6NTMuMjMxMzUyIiwiY3JlYXRlZEF0IjoiMjAyNi0wNy0xNVQxMzoxMDo1My4yMzEzNTMiLCJpbml0QXQiOiIyMDI2LTA3LTE0VDEzOjEwOjUzLjIzMTM0NSJ9LCJiZW5lZml0cyI6W10sImxpbWl0SGlnaGVyIjo3MDAsImxpbWl0TG93ZXIiOjAsInJlZGlyZWN0QnlEZWVwbGluayI6dHJ1ZSwiZGVlcGxpbmsiOiJnYnJhcHBpOi8vY29tLmdyYWJpbGl0eS5yYXBwaT9nb3RvPXJhcHBpX3ByaW1lIn0sImhhc0FjY291bnRzVG9WZXJpZnkiOmZhbHNlLCJjb3VudHJ5Q29kZU5hbWUiOiJNWCIsImlzUHJpbWUiOmZhbHNlfQ==",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1815678826,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_lr_hb_-ttasrx%2Frappi-webv",
+    "value": "{%22heartbeat%22:1784142827888}",
+    "domain": "www.rappi.com.mx",
+    "path": "/",
+    "expires": 1784229227,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "amplitude_id_101be7b7fdda892d329579012e8dd69arappi.com.mx",
+    "value": "eyJkZXZpY2VJZCI6IjU3NDkwM2MwLWU5MjktNGFlMy1iNTJiLTgyZGU4MTNkMjVjNlIiLCJ1c2VySWQiOm51bGwsIm9wdE91dCI6ZmFsc2UsInNlc3Npb25JZCI6MTc4NDE0Mjc3ODY4NSwibGFzdEV2ZW50VGltZSI6MTc4NDE0MjgyODAwNiwiZXZlbnRJZCI6MCwiaWRlbnRpZnlJZCI6MCwic2VxdWVuY2VOdW1iZXIiOjB9",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702828.007025,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "currentLocation",
+    "value": "JTdCJTIyaWQlMjIlM0E3MyUyQyUyMmNpdHklMjIlM0ElMjJVcnVhcGFuJTIyJTJDJTIydXJsJTIyJTNBJTIydXJ1YXBhbiUyMiUyQyUyMmxhdCUyMiUzQTE5LjQxNDUzODc1Mzc3NSUyQyUyMmxuZyUyMiUzQS0xMDIuMDUzNjQzMDM0OTI5JTJDJTIyYXV0b0xvY2F0aW9uJTIyJTNBdHJ1ZSUyQyUyMmFkZHJlc3MlMjIlM0ElMjJVcnVhcGFuJTIyJTJDJTIyYWN0aXZlJTIyJTNBdHJ1ZSU3RA==",
+    "domain": ".www.rappi.com.mx",
+    "path": "/",
+    "expires": 1815678862.011152,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ga_KLC0Z8KSQ7",
+    "value": "GS2.1.s1784142778$o1$g1$t1784142828$j10$l0$h0",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702828.065842,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ga_EH4F8E7F7Z",
+    "value": "GS2.1.s1784142778$o1$g1$t1784142828$j10$l0$h0",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702828.316135,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_uetsid",
+    "value": "31938240808111f19bc9dbe0d3c45dff",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1784229228,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_uetvid",
+    "value": "3193ab60808111f180d70755e60bec80",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1817838828,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_hjSessionUser_1812182",
+    "value": "eyJpZCI6IjUxNjBhY2NkLWU2NDItNTNmNS05M2Y5LTExODFmOWQ5MGE1YyIsImNyZWF0ZWQiOjE3ODQxNDI3NzkwMTgsImV4aXN0aW5nIjp0cnVlfQ==",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1815678828,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_lr_tabs_-ttasrx%2Frappi-webv",
+    "value": "{%22recordingID%22:%226-019f6732-4e2b-7a0b-a129-bce2ebeca13e%22%2C%22sessionID%22:0%2C%22lastActivity%22:1784142828722%2C%22hasActivity%22:false%2C%22confirmed%22:true%2C%22clearsIdentifiedUser%22:false}",
+    "domain": "www.rappi.com.mx",
+    "path": "/",
+    "expires": 1784229228,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PSIDCC",
+    "value": "AKEyXzXOspe5sM6AvjlxNBrgcHf9KI_p4PHZHHeN01rFnwo01o372eu3_cddGmp9MFcN7u0zPA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815678829.746051,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "ttcsid",
+    "value": "1784142778725::VcPMyaHDNmkFavpCveXf.1.1784142828834.0::1.-1307.0::0.0.0.0::0.0.0",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1817838828,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ttcsid_CE5ADGRC77UA05OMOTOG",
+    "value": "1784142778723::YktwN5170VdBbWVtcK2f.1.1784142828834.1",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1817838828,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ga",
+    "value": "GA1.3.1196832402.1784142778",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702828.997484,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ga_G7R9PG8C1M",
+    "value": "GS2.1.s1784142778$o1$g1$t1784142829$j9$l0$h0",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702829.010361,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ga_FGJHX7E4KW",
+    "value": "GS2.1.s1784142778$o1$g1$t1784142829$j9$l0$h0",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702829.014847,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "AMP_101be7b7fd",
+    "value": "JTdCJTIyZGV2aWNlSWQlMjIlM0ElMjI2OWEzODE0OS0zODk3LTQxZGItODM5Yi1hMjgzZDA2M2I4ZTQlMjIlMkMlMjJ1c2VySWQlMjIlM0ElMjJNWF8yMTUzODUxNTk5JTIyJTJDJTIyc2Vzc2lvbklkJTIyJTNBMTc4NDE0Mjc3Nzc5NCUyQyUyMm9wdE91dCUyMiUzQWZhbHNlJTJDJTIybGFzdEV2ZW50VGltZSUyMiUzQTE3ODQxNDI4MjkwNTQlMkMlMjJsYXN0RXZlbnRJZCUyMiUzQTQlMkMlMjJwYWdlQ291bnRlciUyMiUzQTAlN0Q=",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1815678829,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ab.storage.userId.f6a1117f-52de-444c-9fbd-49d465e7f80e",
+    "value": "g%3AMX_2153851599%7Ce%3Aundefined%7Cc%3A1784142829229%7Cl%3A1784142829231",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702829,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ab.storage.deviceId.f6a1117f-52de-444c-9fbd-49d465e7f80e",
+    "value": "g%3A46e6f3cb-01fe-b9d4-45e4-ff1230388127%7Ce%3Aundefined%7Cc%3A1784142829232%7Cl%3A1784142829232",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702829,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "ab.storage.sessionId.f6a1117f-52de-444c-9fbd-49d465e7f80e",
+    "value": "g%3Aedda9724-390e-bf21-fbde-ab9ee6e95fc7%7Ce%3A1784144629236%7Cc%3A1784142829230%7Cl%3A1784142829236",
+    "domain": ".rappi.com.mx",
+    "path": "/",
+    "expires": 1818702829,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  }
+]
