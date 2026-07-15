@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any
 import re
 import unicodedata
@@ -82,7 +82,8 @@ def normalizar_texto(texto: str) -> str:
 # ---------- FUNCIONES DE BÚSQUEDA ----------
 def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     medicamento_norm = normalizar_texto(medicamento)
-    fecha_limite = (datetime.now() - timedelta(hours=horas)).isoformat()
+    # CORREGIDO: Usamos timezone.utc para que la fecha generada tenga el +00:00 al final
+    fecha_limite = (datetime.now(timezone.utc) - timedelta(hours=horas)).isoformat()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -96,7 +97,8 @@ def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
 
 def get_resumen(medicamento: str) -> List[Dict[str, Any]]:
     medicamento_norm = normalizar_texto(medicamento)
-    fecha_limite = (datetime.now() - timedelta(hours=24)).isoformat()
+    # CORREGIDO: Usamos timezone.utc para que la fecha generada tenga el +00:00 al final
+    fecha_limite = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
