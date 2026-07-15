@@ -28,8 +28,8 @@
 - ✅ Funciona tanto en **Telegram** como en **WhatsApp**.
 - ✅ Utiliza **Claude (Anthropic)** para interpretar consultas sobre medicamentos.
 - ✅ Obtiene precios públicos mediante **Web Scraping** desde farmacias con sitios web.
+- ✅ Almacena el historial de precios en una base de datos SQLite o PostgreSQL.
 - ✅ Guarda los resultados del scraping en formato **JSON**.
-- ✅ Almacena el historial de precios en una base de datos SQLite.
 - ✅ Consulta automáticamente los precios registrados durante las últimas 24 horas.
 - ✅ Normaliza nombres comerciales (ej. Tempra, Aspirina, Ozempic) utilizando Claude antes de consultar la base de datos.
 - ✅ Muestra un ranking de farmacias ordenado por precio.
@@ -60,6 +60,10 @@
 | BeautifulSoup4 | Extracción de información HTML |
 | lxml | Parser HTML |
 | python-dotenv | Variables de entorno |
+| Playwright | Web Scraping de sitios dinámicos (JavaScript) |
+| APScheduler | Automatización de tareas de scraping |
+| PostgreSQL | Base de datos en producción |
+| Cloudflare R2 | Almacenamiento de capturas de pantalla (screenshots) |
 | SQLite | Base de datos para historial de precios |
 | ngrok | Exposición del servidor local |
 
@@ -158,29 +162,36 @@ El sistema está dividido en módulos independientes.
 # 📁 Estructura del Proyecto
 
 ```text
-dr-ahorro-bot/
+dr-ahorro/
 │
 ├── bot/
 │   ├── __init__.py
+│   ├── counter.py
+│   ├── telegram_notifier.py
 │   ├── telegram_handler.py
 │   └── whatsapp_handler.py
 │
-├── config/
-│   └── __init__.py
-│
 ├── data/
 │   ├── __init__.py
+│   ├── database.py
+│   ├── agents/
+│   │   └── playwright_agent.py
+│   ├── ocr/
+│   │   ├── claude_extractor.py
+│   │   └── tesseract_extractor.py
 │   └── scrapers/
 │       ├── web_scraper.py
-│       └── resultados_farmacias.json
+│   └── imagenes_prueba/
+│       └── farmacia_1.jpg
 │
 ├── llm/
 │   ├── __init__.py
 │   └── normalizer.py
 │
 ├── screenshots/
+│   └── ... (capturas de Playwright)
 │
-├── hallazgos_scraping.md
+├── hallazgos_playwright.md
 ├── .env
 ├── .env.example
 ├── .gitignore
@@ -487,19 +498,17 @@ Si no se configuran, la notificación simplemente se omite.
 # 🚧 Mejoras Futuras
 
 - Consultar múltiples farmacias automáticamente.
-- Integrar Selenium para sitios con contenido dinámico.
 - Automatizar el flujo OCR para farmacias sin HTML público.
 - Detectar automáticamente cuándo utilizar Scraping u OCR.
 - Calcular precios promedio entre múltiples farmacias.
 - Implementar caché para reducir consultas repetidas.
-- Almacenar historial de búsquedas en una base de datos.
 - Exponer una API REST para consultar medicamentos y precios.
 
 ---
 
 # 🙏 Créditos
 
-Proyecto desarrollado con fines educativos para practicar:
+Proyecto desarrollado para practicar:
 
 - Arquitectura de software en Python.
 - Bots conversacionales.
@@ -514,7 +523,7 @@ Proyecto desarrollado con fines educativos para practicar:
 
 # 📜 Licencia
 
-Este proyecto fue desarrollado con fines académicos y educativos.
+Este proyecto es de código abierto y puede ser utilizado como referencia.
 
 ---
 
