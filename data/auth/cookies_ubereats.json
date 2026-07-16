@@ -1,0 +1,684 @@
+[
+  {
+    "name": "uev2.id.session_v2",
+    "value": "6ee37c00-acbb-4ec0-8e66-2704599352b4",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1784156331.529147,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "uev2.ts.session_v2",
+    "value": "1784154208754",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1784156331.529433,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "uev2.id.xp",
+    "value": "c312543b-cf0b-431e-826d-3242df628b10",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "dId",
+    "value": "48340d4e-39cc-47d4-a0da-be697dbff76d",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1815690382.300507,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "uev2.id.session",
+    "value": "0a470ed3-96fc-4e5b-9974-1b8fe03037dd",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1784156331.529676,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "uev2.ts.session",
+    "value": "1784154208757",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1784156331.529792,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_ua",
+    "value": "{\"session_id\":\"a800821c-6bff-4041-8f17-5d2e6a7669d7\",\"session_time_ms\":1784154208833}",
+    "domain": "www.ubereats.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "marketing_vistor_id",
+    "value": "a1553fa2-691c-4d9f-89a7-0a14ae7058b8",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1815690530.656716,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "jwt-session",
+    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InNsYXRlLWV4cGlyZXMtYXQiOjE3ODQxNTYwMDg4MzR9LCJpYXQiOjE3ODQxNTQyMDgsImV4cCI6MTc4NDI0MDYwOH0.y20HiKdDhP0CV6QP70TkXkHeRHsLn2TCDEgFxfQfm0Q",
+    "domain": "www.ubereats.com",
+    "path": "/",
+    "expires": 1784240782.300648,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "cf_clearance",
+    "value": "tql8dOpAAyFFX7801U.hst4pXEdbHQv9ck8OYbIFIGM-1784154209-1.2.1.1-Prbh1nwZYFUKtGZOr5rwj3MxYrvVx4DTKZN8oGNrAD.xAryiomBdP9HmDElnNbjTk33UbofGY25Q.hRKtbmOn2eavtEfksyu6kp5V8dbKKkwwt.vzr0FX8LaPCAPkizkMavSh8AzT42AdkvlcdsidylPcEdgy2Fu56XWbkKIcU0Pk0AHNTrxggHtfWx_h7y6UfSGVdG5xl9jQP8b3TidM_dOJWVCk6mLjWVVb23kVDwVAK6C3Rlk6U17PajOue5e5Hrpb4IprrLKB9pAG.ZHj61tZ5_pBwXvnkyPWpU_ryZX.T1D2FgiGzL4jbNCX67Ix9cc1MtHgPnywG3VPT9yGw",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1815690382.893132,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None",
+    "partitionKey": "https://ubereats.com",
+    "_crHasCrossSiteAncestor": false
+  },
+  {
+    "name": "_ua",
+    "value": "{\"session_id\":\"b867c6f3-8092-4c73-a2fc-72253c61b8f5\",\"session_time_ms\":1784154211490}",
+    "domain": "auth.uber.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "marketing_vistor_id",
+    "value": "99e2823a-ac36-40cc-830f-ff0d65cef2ff",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1815690527.701369,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "x-uber-analytics-session-id",
+    "value": "118c0cac-77fb-42e6-97df-29bc0d23768c",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1784156185.037445,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "udi-id",
+    "value": "X44VHVMStnHpdAR3QWDdzmc4xNgAKyVRo6pe7te/diTEDXVr75/uaT9esJUMTgX+V6EomfcRXtNrO9PTXIECDneBHtjA3kWbBK7F5OFuyx5m2nfgT7tOl4e0sVxSzln0FMCGUMJVmvwyQgLRUk5qyAPp4qWUkZaitmmbvGPvNOKRE0y0A7CCA1ihSV/HsjHXoyY8NopVWVPD91dyw0W3ow==PTWDw39cSym90OBIXAP+Fg==/kuKDJRjEZvTpuUgqPuA2a8U/NJTBq7qkRonrhQ+ku0=",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1818714385.037471,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "jwt-session",
+    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InNsYXRlLWV4cGlyZXMtYXQiOjE3ODQxNTYwMTE1MzR9LCJpYXQiOjE3ODQxNTQyMTEsImV4cCI6MTc4NDI0MDYxMX0.rmSaa-usyk3LvHJf5VMWEFQPoNfwtr9QgPLtGrFx_mU",
+    "domain": "auth.uber.com",
+    "path": "/",
+    "expires": 1784240785.037499,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_cc-x",
+    "value": "MDRiMzQ0NWMtMGFiZC00OGU1LThkODQtODg3MjRiZDQ1ZTVmOjE3ODQxNTQyMTIwNjM",
+    "domain": "www.cdn-net.com",
+    "path": "/",
+    "expires": 1799706506.507492,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_cc",
+    "value": "AYV4oC9c%2FOvRW9D8Upvmniyo",
+    "domain": "auth.uber.com",
+    "path": "/",
+    "expires": 1815668907,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "rateLimiterCookieSession",
+    "value": "{\"rateLimitingID\":\"24f23e9d-82a5-401c-a1d5-c1d2b38e6aaa\"}",
+    "domain": "auth.uber.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "_iidt",
+    "value": "RHGiBgpgyufGuNhfuhGtjrwTeL+P1dijhspQQ+cjvqZJShlo32kqtwsaLug/miJhLH6D5cJOudvk/g==",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1815690388.816775,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_vid_t",
+    "value": "PzGdLEEMFmZ/8JWtUgX2KFSyHwKzShakjUYq/u02m3WOIxzGwwgxi3fZieDAolADydNpiuzo84J1/Q==",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1815690388,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "udi-dd-fjs",
+    "value": "LADCF40bQ44wAfkE4ogi15A+Ty1K+tLiV1v4adeGgUvOIYXG70pS63fVIi6UglVD4UIbowf0MR6/k5uB82mqmx/FIzNoOLVIWIfj4D/hlgtJgjrH5A0s70LzymxajJioB4lTmbIn2ZGIR9xnMxh2qUopU2J4gNoYZ/SeHcjSMxosgJ27ed0QFlDc/yvRPgfygzkKhrxy/GEeZxlvZjo3ARwcS+lyM4FgGwdAllWWc0doXINBmTHc/XtP6PewjLd4GoKaYl/DGatmdwOe/YoNbAbudOSNRQUfpk+HfPgDJgcRE2wki2TPg/xSjgPBBVKYA4TxGTPsjrgFoW785h42tDyT66X4DEDkyDqbh+2W/dcaL3hW4z2/01jB8qSVjwkivRu/4e/X2rrEROWBQRnN5xaPrP2iheEf6/LfJoIgHsIJzQxdYbCC3zD955dUand18F/2K99roq2HqC/4QlbSRg==d2DpaZV3FL2jO/1v1CKRa2g6W6k4PvVPn1JhBq0pQ/g=",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1818714388.95404,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "g_state",
+    "value": "{\"i_l\":0,\"i_ll\":1784154389240,\"i_b\":\"HJ9aPCgbZ1a0py1XxZXPvd0Ob4zZoJfBP6k1iEPgCi4\",\"i_e\":{\"enable_itp_optimization\":24},\"i_et\":1784154389240}",
+    "domain": "auth.uber.com",
+    "path": "/",
+    "expires": 1799706389,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "NID",
+    "value": "533=EjKrLOSiW5FrjpqRl_vi6HUHM9aWFj0B0R7P4V6Ev1Q5ll2_D4-BXfL1Q3_Vx8oVubqWeqfsRqB4azbllL4K24qB-6Nc3pvjKXlSg4phYVriyUtOIheROLoZKkKPXyk96xrh3Ds98vHEsNOjktTom__uqn38g3uwwmgAG0I-cIDt5WIdlDtN4jHsy8kg2_XPvMnWVwXxJBNrNGMhWzXXf_eYoNxqK7wJnVZI1ji64NoQo2Sbb0eERnZuwR2BooKiUOJ9FqKmPk3UPMpI02FE11GmmkQ1ihPFekyFb4g1eYs4CTQovIUcxcgQ5qWGTAuQ9wDrkLBY1VG_ndL_koqymnnRAhm2fHitj4gD3_x6Am04hfAojVHU1PKj2F4GVH8wIu4g5FHyWIQOPuaJ09Z14spUwWd_hwSb6B7sZIxFMPeitaldJqrVLdNGJf6NclBLbxAyhiXoTSRDdAzljX2lzjfTwqNQyFkW8No6nffRfecvryjrSh50HOY2ELdwM0kr1MFFydRgXi0qxafAT5_koSLCa96w8MKQfFvE5bUWhinI5wHqne8beSU0DnsppQFeqAiX-x3rZIHXeLTEzohxmWGxlzly2mjjURlVqsDrf8bbkCNTCrgkAUh7EX77P6JP",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1799965676.546112,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "HSID",
+    "value": "Agr66Fpnlq0jKB2cu",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818714505.546416,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SSID",
+    "value": "AF8g4JwAKhXqyM8ug",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818714505.546441,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "APISID",
+    "value": "MxYv3XZ5VukCc13m/ABkvY4i1c1kEpaDYp",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818714505.546467,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SAPISID",
+    "value": "fXJ2Ht3MSSxkQRKF/A_MuHITFK8Xvgxu2q",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818714505.546491,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PAPISID",
+    "value": "fXJ2Ht3MSSxkQRKF/A_MuHITFK8Xvgxu2q",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818714505.546522,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PAPISID",
+    "value": "fXJ2Ht3MSSxkQRKF/A_MuHITFK8Xvgxu2q",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818714505.546546,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "LSID",
+    "value": "s.MX:g.a000_wgMb7HExjsInGx2FIPZri4tzz22DYQR_tZ3kp0XqhGq77kca6M05bVZuzF7cHQ-yWwA1wACgYKAbsSARESFQHGX2MibHY0PSQ6WYDsvaBLEveb0RoVAUF8yKpO8ENMFdnMOPMJNT8datjR0076",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818714505.640398,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Host-1PLSID",
+    "value": "s.MX:g.a000_wgMb7HExjsInGx2FIPZri4tzz22DYQR_tZ3kp0XqhGq77kcOg1RoOyNZOmG8j3H8f5AEAACgYKAd4SARESFQHGX2MieztWRKOvhu4bOqQXHh5rdhoVAUF8yKp4upRbCWFEeknX2lsIRkUf0076",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818714505.640527,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Host-3PLSID",
+    "value": "s.MX:g.a000_wgMb7HExjsInGx2FIPZri4tzz22DYQR_tZ3kp0XqhGq77kcMs_ljI-ECysBmhRl83rg9gACgYKARcSARESFQHGX2MibL0TpgaodeRjA479gThs8BoVAUF8yKoBHvcWGyxt9thJQWalkhpj0076",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818714505.64059,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "ACCOUNT_CHOOSER",
+    "value": "AFx_qI482q2T6O8-ym9Clm3M7AleBUAHbLnHw8IUyMwgLmOjwgcQXrdddKQ3fmeOzhgxMISOKg47uUD3VjrfQliNvMIpc4DNvmmHq-Vb3HhlpINKLFBOkRiW-GtQCKEnCIySiR5dM1OtXOP2zDhiwGdEZWGaJAZ8vQ",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818714505.640645,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SID",
+    "value": "g.a000_wgMbyLqCUlWKB27vwe96fcDBXDmpL_ILymvfzCCowEry88eiiB6Q0jY8MTrIyjO5PBxgwACgYKAQcSARESFQHGX2MiIcDYdt_CCAjgDyWeUAMd0xoVAUF8yKqzW5t1lsFTZuXSTYGTFU1H0076",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818714505.800744,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PSID",
+    "value": "g.a000_wgMbyLqCUlWKB27vwe96fcDBXDmpL_ILymvfzCCowEry88eNKfCzctk9IBaFK9AnH8u_wACgYKAXcSARESFQHGX2MimtQ4XTdzLk6pZUp-gnE1JxoVAUF8yKqwrVRv-qkg2W-xeeuZm4gB0076",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818714505.800797,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PSID",
+    "value": "g.a000_wgMbyLqCUlWKB27vwe96fcDBXDmpL_ILymvfzCCowEry88evDkiRHhJJvrdcb5_KQpwwgACgYKAW4SARESFQHGX2Mi1o8rz1xqhNQE6b9qoYQGWRoVAUF8yKpEPgI2bjOGD6kPh-OSIota0076",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1818714505.800842,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "HSID",
+    "value": "A3uzGEvjKGg9yghnJ",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818714505.806151,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SSID",
+    "value": "Adk8J6QLrOyDXxwWb",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818714505.806252,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "APISID",
+    "value": "MxYv3XZ5VukCc13m/ABkvY4i1c1kEpaDYp",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818714505.806296,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "SAPISID",
+    "value": "fXJ2Ht3MSSxkQRKF/A_MuHITFK8Xvgxu2q",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818714505.806327,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PAPISID",
+    "value": "fXJ2Ht3MSSxkQRKF/A_MuHITFK8Xvgxu2q",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818714505.806354,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PAPISID",
+    "value": "fXJ2Ht3MSSxkQRKF/A_MuHITFK8Xvgxu2q",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818714505.806381,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "NID",
+    "value": "533=HXkBLtRWFEahrsWj5qs4pywAJI3vsSd4j2aXpjLUmNDX8jafSJ4ip5og2MElkLxwiZBWq5Pq2LZKNAADx4oJh7SurZDsI6H9ZQmQlsDkuRhTa5mOZZl3wJ7sF_OTVTlyXFsZ1Azw-K_CmbOCb_b5wx2kqquUhDK-VqaoNXunEqYY82zySrAXhYIfgOe1QL6S7sr5l6Ni2Zhpgh1q4w",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1799965705.806408,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "SID",
+    "value": "g.a000_wgMb4TPR9fMhS4hrlm687sSHzEEQ6s2h1m_3Q_zCKVChb-AkhXK6a3YNynMrkOcscQycwACgYKAb0SARESFQHGX2MiNBK1ApjihhfGT4MGnxSLghoVAUF8yKr0ytOSggEIyhe2xEUISZby0076",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818714505.806449,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PSID",
+    "value": "g.a000_wgMb4TPR9fMhS4hrlm687sSHzEEQ6s2h1m_3Q_zCKVChb-AwRS7sJ4u-H05XX1jDnDokgACgYKAWYSARESFQHGX2MiLQ1v8KQRUhFIcxl6Hxv0ehoVAUF8yKoGEYmYIh5FJn5RsSVVfvat0076",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818714505.806493,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PSID",
+    "value": "g.a000_wgMb4TPR9fMhS4hrlm687sSHzEEQ6s2h1m_3Q_zCKVChb-AdVZaSuiMguR4PXbUYLD-7QACgYKAbgSARESFQHGX2MirNhr6ECWHsdPLMfNBN8stRoVAUF8yKohFUgrYrz9DrhD-8lYE6Wh0076",
+    "domain": ".google.com.mx",
+    "path": "/",
+    "expires": 1818714505.806546,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "__Secure-1PSIDTS",
+    "value": "sidts-CjYBPWEu2Xj3Psxe7clyHXxL7UQtY96wdqi84XNEuKKJ62iZg2b6ZcKeAcjQxqhCn6a5gafFdhsQAA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815690506.026198,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PSIDRTS",
+    "value": "sidts-CjYBPWEu2Xj3Psxe7clyHXxL7UQtY96wdqi84XNEuKKJ62iZg2b6ZcKeAcjQxqhCn6a5gafFdhsQAA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1784155106.026331,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PSIDTS",
+    "value": "sidts-CjYBPWEu2Xj3Psxe7clyHXxL7UQtY96wdqi84XNEuKKJ62iZg2b6ZcKeAcjQxqhCn6a5gafFdhsQAA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815690506.026387,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "__Secure-3PSIDRTS",
+    "value": "sidts-CjYBPWEu2Xj3Psxe7clyHXxL7UQtY96wdqi84XNEuKKJ62iZg2b6ZcKeAcjQxqhCn6a5gafFdhsQAA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1784155106.026439,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "SIDCC",
+    "value": "AKEyXzUiMnonTclLnhHeNTM_NnAYzLTDzZFTL7cBDJKJH-mZkzzGDVhsyg2GEF0WRurmJEN3",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815690506.028609,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-1PSIDCC",
+    "value": "AKEyXzW06HNZsbjz8S5KmPLtCS2e1L2-i0z3Bs1BYIFA3oYLExt6TW72k00D7Cd6E_U6JjYG",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815690506.028681,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Host-GAPS",
+    "value": "1:di69P93u-omurUPBsEKMoRsRsxPt8K7dg-bCTPVYCD6sJhgdkdS9NVUFcukwfy6duX2catZpEbPspPzz20kpYNRYTmSdI4udKkvAGWwy8nlVE8waBLCz6EExfmk01cI2zhf5GCEVg3uHhFVEI-4i0aDqhDWolB-Lrqv1Y223JR3EnU03wGpHcw:4AgLwLCYiagzIQcc",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818714506.053386,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Host-GAPSTS",
+    "value": "gapsts-Ci0BtKsiLBPxk5po3HF1q3GSSdZPzCuc1Zq5bH_NPx-30yEWr26nUHfPYnW6XDYQAQ==",
+    "domain": "accounts.google.com",
+    "path": "/",
+    "expires": 1818714506.206951,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "udi-fingerprint",
+    "value": "S0pIctWM4yPDm70K2STpDC39teePJxSx29UJak7opOsyQem9bavtRNCP7G0d7ANgaMT3IEekJJ1V0XofTDEXxw==V0eHE8vQiqxqV2BGu3mc80sbDzi2R7aJumKev2MwCbQ=",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1818714507.400348,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__Secure-3PSIDCC",
+    "value": "AKEyXzWX509jc3l-38n7A4uGrxcollYOAoBLimUpu7lNUMtQ82uIMLxFRLDPPKWlngGpKI5MVA",
+    "domain": ".google.com",
+    "path": "/",
+    "expires": 1815690508.401335,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "udi-dd-aia",
+    "value": "GgeULZFolGj8BnxOWBlJ8zyX0170yiqpHDo84B07gKwrchioS5fUelTEEGjPdWLAyjZz1UcIQa5n45LQl7sP8OF31/dpJllhUvVQi2Z6tWBlQfymkKWyz81/7JvKJJJj+HBy+rDoFz2Y8eC8e9b9OU6NK2DyUaQ059SzfOFMrhbwpVeb+drumXXVHlabVbZLmkFKdAS0BsEdRtW02N7NyPVIey7tRJjcjDLwN2Ww9q6WIjC7YQzis6DlbaBwM8xwM9KzlX4yY1mw3PqdJ5veAxxwVuNNcbik2NL9OmtEOWnnZyZnfhq0mRCZ4Q7C7SK+2/x4EQ2yHU6JCt0dO7/OgFBq4jX5bgzRKvq117b/beXBetL5T7vLh/Jta6oBFlvLsgWBL13pFRlOoiZa/JGKD/o2TNtcGtUgJdXBRNymoeoOXL2oaK91QpaNesE54TMZoxcG14gCkHiiFHSks47XyA==EqVmSRYAS6zloZxzD5CgOqyI7g0wsoEnzZkc4y8NJ1E=",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1818714507.55707,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "isWebLogin",
+    "value": "true",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1784154827.701532,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "csid",
+    "value": "1.1799706354159.JZl90EuCvVDAY3au6y2RYmdllnrc5SNfyHfyDv5VZk0=",
+    "domain": ".auth.uber.com",
+    "path": "/",
+    "expires": 1799706527.701584,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "sid",
+    "value": "QA.CAESEA13wQchyk0mocnNSrEIL7MY8q2V2gYiATEqJGI3NTU2MGVjLTlmY2QtNDBhNy1hYzU2LWNiMTUyMzUwYjg2MTI8I42gle51pxLbi_tNC6SVnvoJ_ElHIuM5PS7QixXYWMBfCfBCXkvcSS66DdTFRdf-WBfqNPSTmADiRPgVOgExQgh1YmVyLmNvbQ.hAJySae9XwwVeUonOgGHVeCf4WBu8MPf-xlf1aD_3DE",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1799706527.701631,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "smeta",
+    "value": "{\"expiresAt\":1799706354159}",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1799706527.70168,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "usl.vsi.56656359-659d-4f4e-b7d6-a0fa1d5e6a55_6905636e-4543-40bb-bce0-49bd72814968",
+    "value": "https://www.ubereats.com/login-redirect/?app_clip=false&campaign=signin_universal_link&guest_mode=false&marketing_vistor_id=a1553fa2-691c-4d9f-89a7-0a14ae7058b8&redirect=%2Fmx&source_cta=undefined&source_flow=undefined&_sid=1.UUEuQ0FFU0VBMTN3UWNoeWswbW9jbk5TckVJTDdNWThxMlYyZ1lpQVRFcUpHSTNOVFUyTUdWakxUbG1ZMlF0TkRCaE55MWhZelUyTFdOaU1UVXlNelV3WWpnMk1USThJNDJnbGU1MXB4TGJpX3ROQzZTVm52b0pfRWxISXVNNVBTN1FpeFhZV01CZkNmQkNYa3ZjU1M2NkRkVEZSZGYtV0JmcU5QU1RtQURpUlBnVk9nRXhRZ2gxWW1WeUxtTnZiUS5oQUp5U2FlOVh3d1ZlVW9uT2dHSFZlQ2Y0V0J1OE1QZi14bGYxYURfM0RF.1784154654228.Z_cuaJZ9eqbmXzK4-Oc2_XhKkOMebfLUypgvYl9dyp4&state=lj2l9Z3SGLHJla6mqjYM_N5TmQ3lKiLTBVJEj4_INSE%3D&effect=&sm_flow_id=-ksSz19R&x-uber-did=48340d4e-39cc-47d4-a0da-be697dbff76d",
+    "domain": "auth.uber.com",
+    "path": "/",
+    "expires": 1784154587.70174,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "sid",
+    "value": "QA.CAESEA13wQchyk0mocnNSrEIL7MY8q2V2gYiATEqJGI3NTU2MGVjLTlmY2QtNDBhNy1hYzU2LWNiMTUyMzUwYjg2MTI8I42gle51pxLbi_tNC6SVnvoJ_ElHIuM5PS7QixXYWMBfCfBCXkvcSS66DdTFRdf-WBfqNPSTmADiRPgVOgExQg0udWJlcmVhdHMuY29t.IvWP8WK9yMVXJxCyIB8u0t0DP1e7oYHX1JU-sxI8Pdk",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1799706527.956819,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "smeta",
+    "value": "{expiresAt:1799706354495}",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1799706527.956865,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__cf_bm",
+    "value": "nebMdZcuai1t.TudaPcUrgvoN4wo3vvMnqPH6kpgsY4-1784154355-1.0.1.1-hmnQA_AT7Q4aQym36ps4R18TTfPDVpYdu_J70zsivf_bGaH8rgIy__.QTMCZFDVsRQPHd_sRj5jugD5mZxZOD78ySWX2G.v2SJztApsiJig",
+    "domain": ".uber.com",
+    "path": "/",
+    "expires": 1784156329.270781,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "uev2.embed_theme_preference",
+    "value": "light",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "mp_adec770be288b16d9008c964acfba5c2_mixpanel",
+    "value": "%7B%22distinct_id%22%3A%20%22b75560ec-9fcd-40a7-ac56-cb152350b861%22%2C%22%24device_id%22%3A%20%2219f67e3616efc5-07c581fc11708e8-26001951-100200-19f67e3616f1338%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%2C%22%24user_id%22%3A%20%22b75560ec-9fcd-40a7-ac56-cb152350b861%22%7D",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1815690529,
+    "httpOnly": false,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "__cf_bm",
+    "value": ".iUmnBYGXjakWN.2M.O_.8Ky_zVDoiHmcfQpQWukmUo-1784154359-1.0.1.1-.nFzg.IfPGPsANckRPH3tRtWukLkrlv6VJuptPAVCXnST85A9c9dPsJ.MyVYhHC7YJorvYtkWs8Auww.iBhTQAuU9W_yyxPKZjy4twwORzY",
+    "domain": ".ubereats.com",
+    "path": "/",
+    "expires": 1784156332.529856,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": "None"
+  }
+]
