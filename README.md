@@ -28,6 +28,8 @@
 - ✅ Funciona tanto en **Telegram** como en **WhatsApp**.
 - ✅ Utiliza **Claude (Anthropic)** para interpretar consultas sobre medicamentos.
 - ✅ Obtiene precios públicos mediante **Web Scraping** desde farmacias con sitios web.
+- ✅ Extrae precios de plataformas de delivery como **Rappi** y **Uber Eats** usando agentes automatizados.
+- ✅ Ejecuta tareas de recolección de datos de forma automática y programada.
 - ✅ Almacena el historial de precios en una base de datos SQLite o PostgreSQL.
 - ✅ Guarda los resultados del scraping en formato **JSON**.
 - ✅ Consulta automáticamente los precios registrados durante las últimas 24 horas.
@@ -61,7 +63,7 @@
 | lxml | Parser HTML |
 | python-dotenv | Variables de entorno |
 | Playwright | Web Scraping de sitios dinámicos (JavaScript) |
-| APScheduler | Automatización de tareas de scraping |
+| schedule | Automatización de tareas de scraping |
 | PostgreSQL | Base de datos en producción |
 | Cloudflare R2 | Almacenamiento de capturas de pantalla (screenshots) |
 | SQLite | Base de datos para historial de precios |
@@ -170,12 +172,15 @@ dr-ahorro/
 │   ├── telegram_notifier.py
 │   ├── telegram_handler.py
 │   └── whatsapp_handler.py
-│
-├── data/
 │   ├── __init__.py
 │   ├── database.py
 │   ├── agents/
-│   │   └── playwright_agent.py
+│   │   ├── __init__.py
+│   │   ├── rappi_agent.py
+│   │   └── ubereats_agent.py
+│   ├── auth/
+│   │   ├── cookies_rappi.json
+│   │   └── cookies_ubereats.json
 │   ├── ocr/
 │   │   ├── claude_extractor.py
 │   │   └── tesseract_extractor.py
@@ -190,12 +195,12 @@ dr-ahorro/
 │
 ├── screenshots/
 │   └── ... (capturas de Playwright)
-│
-├── hallazgos_playwright.md
 ├── .env
 ├── .env.example
 ├── .gitignore
+├── hallazgos_playwright.md
 ├── main.py
+├── mantener_db_schedule.py
 ├── requirements.txt
 └── README.md
 ```
