@@ -1,122 +1,168 @@
-"""
-Scheduler automático para scraping con APScheduler.
-Se ejecuta en Railway como un proceso independiente.
-"""
 import os
 import sys
+import asyncio
 import logging
 from datetime import datetime
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.schedulers.blocking import BlockingScheduler
 
-# Configurar logging
+# ── Configurar path ──
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# ── Importar agentes ──
+from data.agents.playwright_agent import main as playwright_main
+from data.agents.rappi_agent import RappiAgent
+from data.agents.ubereats_agent import UberEatsAgent
+from data.database import init_db, get_connection, contar_por_fuente
+
+# ── Logging ──
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # ============================================================
-# FUNCIONES DE SCRAPING (importar desde tus módulos)
+# FUNCIONES ASÍNCRONAS PARA CADA AGENTE
 # ============================================================
-def run_web_scraper():
-    """Ejecuta el web scraper de farmacias."""
-    logger.info("🕷️ Ejecutando web scraper...")
-    try:
-        # Importar y ejecutar tu web scraper
-        from data.scrapers.web_scraper import main as web_scraper_main
-        web_scraper_main()
-        logger.info("✅ Web scraper finalizado correctamente")
-    except Exception as e:
-        logger.error(f"❌ Error en web scraper: {e}")
 
-def run_playwright_agents():
-    """Ejecuta los agentes de Playwright (Rappi y Uber Eats)."""
-    logger.info("🎭 Ejecutando agentes Playwright...")
-    try:
-        # Lista de medicamentos a monitorear
-        medicamentos = ["paracetamol", "ibuprofeno", "diclofenaco", 
-                       "fluoxetina", "metformina", "omeprazol", 
-                       "losartan", "naproxeno"]
+async def ejecutar_agentes_delivery():
+    """Ejecuta los agentes de Rappi y Uber Eats para medicamentos clave."""
+    medicamentos = [
+        "paracetamol 500mg",
+        "ibuprofeno 400mg",
+        "omeprazol 20mg",
+        "naproxeno 500mg"
+    ]
+    
+    rappi = RappiAgent(headless=True)
+    ubereats = UberEatsAgent(headless=True)
+    
+    for med in medicamentos:
+        logger.info(f"🔍 Buscando {med} en Rappi...")
+        try:
+            await rappi.search_medication(med)
+        except Exception as e:
+            logger.error(f"❌ Error en Rappi para {med}: {e}")
         
-        for med in medicamentos:
-            logger.info(f"   🔍 Buscando {med}...")
-            # Importar y ejecutar playwright_agent
-            from data.agents.playwright_agent import main as playwright_main
-            playwright_main(med)
-        
-        logger.info("✅ Agentes Playwright finalizados correctamente")
-    except Exception as e:
-        logger.error(f"❌ Error en agentes Playwright: {e}")
+        logger.info(f"🔍 Buscando {med} en Uber Eats...")
+        try:
+            await ubereats.search_medication(med)
+        except Exception as e:
+            logger.error(f"❌ Error en Uber Eats para {med}: {e}")
 
-def run_all_scrapers():
-    """Ejecuta todo el pipeline de scraping."""
+async def ejecutar_agentes_playwright():
+    """Ejecuta los agentes Playwright (farmacias físicas) para medicamentos clave."""
+    medicamentos = [
+        "paracetamol",
+        "ibuprofeno",
+        "omeprazol",
+        "naproxeno",
+        "metformina",
+        "losartan"
+    ]
+    
+    for med in medicamentos:
+        logger.info(f"🎭 Ejecutando Playwright para {med}...")
+        try:
+            # playwright_main es asíncrono, hay que await
+            await playwright_main(med)
+        except Exception as e:
+            logger.error(f"❌ Error en Playwright para {med}: {e}")
+
+# ============================================================
+# PIPELINE COMPLETO (se ejecuta cada 6 horas)
+# ============================================================
+
+def pipeline_completo():
+    """Ejecuta todos los agentes secuencialmente."""
     logger.info("=" * 60)
     logger.info(f"🚀 INICIANDO PIPELINE COMPLETO - {datetime.now()}")
     logger.info("=" * 60)
     
-    run_web_scraper()
-    run_playwright_agents()
+    # 1. Web Scraper (si existe)
+    try:
+        from scrapers.web_scraper import main as scraper_main
+        logger.info("🕷️ Ejecutando web scraper...")
+        scraper_main()
+        logger.info("✅ Web scraper finalizado")
+    except ImportError:
+        logger.info("ℹ️ Web scraper no disponible, continuando...")
+    except Exception as e:
+        logger.error(f"❌ Error en web scraper: {e}")
+    
+    # 2. Agentes Playwright (farmacias físicas)
+    try:
+        logger.info("🎭 Ejecutando agentes Playwright...")
+        asyncio.run(ejecutar_agentes_playwright())
+        logger.info("✅ Agentes Playwright finalizados")
+    except Exception as e:
+        logger.error(f"❌ Error en agentes Playwright: {e}")
+    
+    # 3. Agentes de Delivery (Rappi + Uber Eats)
+    try:
+        logger.info("🛵 Ejecutando agentes de delivery...")
+        asyncio.run(ejecutar_agentes_delivery())
+        logger.info("✅ Agentes de delivery finalizados")
+    except Exception as e:
+        logger.error(f"❌ Error en agentes de delivery: {e}")
+    
+    # 4. Resumen de la ejecución
+    try:
+        fuente_counts = contar_por_fuente()
+        logger.info("📊 Registros por fuente:")
+        for fuente, count in fuente_counts.items():
+            logger.info(f"   {fuente}: {count} registros")
+    except Exception as e:
+        logger.error(f"❌ Error obteniendo resumen: {e}")
     
     logger.info("=" * 60)
     logger.info(f"✅ PIPELINE COMPLETADO - {datetime.now()}")
     logger.info("=" * 60)
 
 # ============================================================
-# CONFIGURAR Y ARRANCAR SCHEDULER
+# MAIN - INICIAR SCHEDULER
 # ============================================================
-def start_scheduler():
-    """Inicia el scheduler con las tareas programadas."""
-    logger.info("⏰ Iniciando APScheduler...")
-    
-    scheduler = BackgroundScheduler()
-    
-    # Tarea 1: Scraping completo cada 6 horas
-    scheduler.add_job(
-        run_all_scrapers,
-        trigger=IntervalTrigger(hours=6),
-        id='scraping_completo',
-        name='Scraping completo cada 6h',
-        replace_existing=True
-    )
-    logger.info("   📅 Programado: scraping completo cada 6 horas")
-    
-    # Tarea 2: Solo agentes Playwright cada 12 horas (Rappi/Uber)
-    scheduler.add_job(
-        run_playwright_agents,
-        trigger=IntervalTrigger(hours=12),
-        id='playwright_agents',
-        name='Agentes Playwright cada 12h',
-        replace_existing=True
-    )
-    logger.info("   📅 Programado: agentes Playwright cada 12 horas")
-    
-    scheduler.start()
-    logger.info("✅ Scheduler iniciado correctamente")
-    
-    # Ejecutar una vez al arrancar (opcional, pero recomendado)
-    logger.info("🔄 Ejecutando primer ciclo inmediatamente...")
-    run_all_scrapers()
-    
-    return scheduler
 
-# ============================================================
-# MAIN
-# ============================================================
 if __name__ == "__main__":
-    logger.info("=" * 60)
-    logger.info("🐘 DR. AHORRO - SCHEDULER AUTOMÁTICO")
-    logger.info(f"📦 Entorno: {'PRODUCCIÓN (PostgreSQL)' if os.getenv('DATABASE_URL') else 'DESARROLLO (SQLite)'}")
-    logger.info("=" * 60)
+    # Inicializar base de datos
+    init_db()
+    logger.info("🗄️ Base de datos inicializada")
     
-    scheduler = start_scheduler()
+    # Verificar conexión
+    try:
+        conn = get_connection()
+        conn.close()
+        logger.info("✅ Conexión a base de datos exitosa")
+    except Exception as e:
+        logger.error(f"❌ Error conectando a base de datos: {e}")
+        sys.exit(1)
+    
+    # Crear scheduler
+    scheduler = BlockingScheduler()
+    
+    # Programar pipeline cada 6 horas
+    scheduler.add_job(
+        pipeline_completo,
+        'interval',
+        hours=6,
+        id='pipeline_6h',
+        next_run_time=datetime.now()  # Ejecutar inmediatamente al iniciar
+    )
+    logger.info("⏰ Pipeline programado cada 6 horas")
+    
+    # Programar job de respaldo: solo agentes Playwright cada 12 horas (opcional)
+    # scheduler.add_job(
+    #     lambda: asyncio.run(ejecutar_agentes_playwright()),
+    #     'interval',
+    #     hours=12,
+    #     id='playwright_12h'
+    # )
     
     try:
-        # Mantener el proceso vivo
-        while True:
-            import time
-            time.sleep(60)
+        logger.info("🚀 Scheduler iniciado...")
+        scheduler.start()
     except KeyboardInterrupt:
-        logger.info("⏹️ Deteniendo scheduler...")
-        scheduler.shutdown()
-        logger.info("👋 Scheduler detenido")
+        logger.info("⏹️ Scheduler detenido por el usuario")
+    except Exception as e:
+        logger.error(f"❌ Error en scheduler: {e}")
+        sys.exit(1)
