@@ -1,4 +1,4 @@
-# 🤖 Dr. Ahorro Bot
+﻿# 🤖 Dr. Ahorro Bot
 
 > Bot conversacional multicanal para consultar información y precios públicos de medicamentos en México utilizando **Claude (Anthropic)** como motor de inteligencia artificial y **Web Scraping** para obtener precios reales desde farmacias con sitios web.
 
@@ -10,11 +10,12 @@
 - [🛠️ Tecnologías](#️-tecnologías)
 - [🧠 Arquitectura](#-arquitectura)
 - [📁 Estructura del Proyecto](#-estructura-del-proyecto)
-- [📋 Requisitos Previos](#-requisitos-previos)
+- [💾 Base de Datos (Producción y Desarrollo)](#-base-de-datos-producción-y-desarrollo)
+- [🔄 Migración de Datos (SQLite → PostgreSQL)](#-migración-de-datos-sqlite--postgresql)
+- [⏰ Tareas Programadas (Scheduler)](#-tareas-programadas-scheduler)
+- [ Requisitos Previos](#-requisitos-previos)
 - [⚙️ Instalación y Configuración](#️-instalación-y-configuración)
 - [🚀 Uso](#-uso)
-- [🌐 Web Scraping de Farmacias](#-web-scraping-de-farmacias)
-- [💾 Base de Datos de Historial de Precios](#-base-de-datos-de-historial-de-precios)
 - [ Variables de Entorno](#-variables-de-entorno)
 - [🧪 Posibles Errores y Soluciones](#-posibles-errores-y-soluciones)
 - [🚧 Mejoras Futuras](#-mejoras-futuras)
@@ -30,7 +31,7 @@
 - ✅ Obtiene precios públicos mediante **Web Scraping** desde farmacias con sitios web.
 - ✅ Extrae precios de plataformas de delivery como **Rappi** y **Uber Eats** usando agentes automatizados.
 - ✅ Ejecuta tareas de recolección de datos de forma automática y programada.
-- ✅ Almacena el historial de precios en una base de datos SQLite o PostgreSQL.
+- ✅ Almacena el historial de precios en una base de datos **PostgreSQL** (producción) o **SQLite** (desarrollo).
 - ✅ Guarda los resultados del scraping en formato **JSON**.
 - ✅ Consulta automáticamente los precios registrados durante las últimas 24 horas.
 - ✅ Normaliza nombres comerciales (ej. Tempra, Aspirina, Ozempic) utilizando Claude antes de consultar la base de datos.
@@ -38,6 +39,7 @@
 - ✅ Si no existen precios disponibles, responde con la ficha del medicamento y continúa buscando información.
 - ✅ Probado con usuarios reales mediante WhatsApp utilizando Twilio Sandbox.
 - ✅ Arquitectura modular y fácil de mantener.
+- ✅ Desplegado en **Railway** con base de datos PostgreSQL y tareas programadas.
 - ✅ Respuestas adaptadas al formato de cada plataforma.
 - ✅ Fácil de extender a nuevos canales como Discord o Messenger.
 - ✅ Registro automático del webhook de WhatsApp.
@@ -63,10 +65,11 @@
 | lxml | Parser HTML |
 | python-dotenv | Variables de entorno |
 | Playwright | Web Scraping de sitios dinámicos (JavaScript) |
-| schedule | Automatización de tareas de scraping |
+| APScheduler | Automatización de tareas de scraping |
 | PostgreSQL | Base de datos en producción |
+| psycopg | Driver de PostgreSQL para Python |
 | Cloudflare R2 | Almacenamiento de capturas de pantalla (screenshots) |
-| SQLite | Base de datos para historial de precios |
+| SQLite | Base de datos para desarrollo local |
 | ngrok | Exposición del servidor local |
 
 ---
@@ -97,8 +100,9 @@
           └───────────┬──────────────┘                          │
                       ▼                                         │
             ┌──────────────────┐                                │
-            │   Base de Datos  │◄────────────────────────────────┘
-            │    (SQLite)      │
+            │  Base de Datos   │◄────────────────────────────────┘
+            │ (PG en Prod /    │
+            │  SQLite en Dev)  │
             └──────────────────┘
                       │
                       ▼
@@ -119,7 +123,7 @@ Claude normaliza el medicamento
 (Ej. "Tempra" → "Paracetamol 500 mg")
    │
    ▼
-Consulta SQLite
+Consulta Base de Datos
 (precios últimas 24 horas)
    │
    ├───────────────┐
@@ -172,6 +176,7 @@ dr-ahorro/
 │   ├── telegram_notifier.py
 │   ├── telegram_handler.py
 │   └── whatsapp_handler.py
+│
 │   ├── __init__.py
 │   ├── database.py
 │   ├── agents/
@@ -197,10 +202,13 @@ dr-ahorro/
 │   └── ... (capturas de Playwright)
 ├── .env
 ├── .env.example
+├── data/
+│   ├── migrate.py
+│   └── precios.db (local)
 ├── .gitignore
 ├── hallazgos_playwright.md
 ├── main.py
-├── mantener_db_schedule.py
+├── scheduler.py
 ├── requirements.txt
 └── README.md
 ```
