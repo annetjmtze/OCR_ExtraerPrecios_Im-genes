@@ -3,7 +3,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from flask import Flask, request, Response
 from twilio.twiml.messaging_response import MessagingResponse
 from dotenv import load_dotenv
@@ -26,6 +26,92 @@ init_db()  # Crea la tabla si no existe
 app = Flask(__name__)
 normalizer = MedicamentoNormalizer()
 
+def formatear_respuesta(nombre_generico: str, farmacias: list, delivery: list) -> str:
+    """
+    Construye el mensaje en el formato exacto requerido para la Semana 3.
+    """
+    lines = []
+    lines.append(f"💊 *{nombre_generico.title()}*")
+    lines.append("")
+
+    # ---- 1. FARMACIAS FÍSICAS ----
+    if farmacias:
+        lines.append("📍 *Farmacias cercanas:*")
+        for i, p in enumerate(farmacias, 1):
+            precio = p['precio']
+            farmacia = p['farmacia']
+            linea = f"{i}. {farmacia} — ${precio:.2f}"
+            if p.get('precio_promo'):
+                linea += f"\n   🏷️ Promo: 2x1 hasta el {p.get('vigencia', 'próximo aviso')}"
+            if p.get('vigencia') and not p.get('precio_promo'):
+                linea += f"\n   🏷️ Válido hasta: {p['vigencia']}"
+            lines.append(linea)
+        lines.append("")
+    else:
+        lines.append("📍 No hay farmacias físicas con precios recientes.\n")
+
+    # ---- 2. DELIVERY ----
+    if delivery:
+        lines.append("🛵 *También disponible a domicilio:*")
+        for p in delivery:
+            # Determinar plataforma
+            fuente = p['fuente'].lower()
+            if 'rappi' in fuente:
+                plataforma = "Rappi"
+            elif 'ubereats' in fuente:
+                plataforma = "Uber Eats"
+            else:
+                plataforma = "Delivery"
+
+            # Link: priorizar el de la BD, si no, generar búsqueda
+            url = p.get('url') or p.get('link_producto')
+            if not url:
+                busqueda = nombre_generico.replace(' ', '+')
+                if 'rappi' in fuente:
+                    url = f"https://rappi.com.mx/search?q={busqueda}"
+                elif 'ubereats' in fuente:
+                    url = f"https://ubereats.com/mx/search?q={busqueda}"
+                else:
+                    url = "#"
+
+            # Tiempo de entrega (si no existe, usar default)
+            entrega = p.get('entrega_estimada', '25-35 min')
+
+            linea = f"• {plataforma} ({p['farmacia']}) — ${p['precio']:.2f}"
+            linea += f"\n  ⏱️ {entrega} · 🔗 Pedir aquí: {url}"
+            lines.append(linea)
+        lines.append("")
+
+    # ---- 3. PIE DE PÁGINA: actualización ----
+    if farmacias or delivery:
+        # Tomar la fecha más reciente de todos los precios
+        todos = farmacias + delivery
+        fechas = [p.get('fecha') for p in todos if p.get('fecha')]
+        if fechas:
+            try:
+                # Tomar la fecha más reciente
+                ultima = max(fechas)
+                if isinstance(ultima, str):
+                    ultima = datetime.fromisoformat(ultima.replace('Z', '+00:00'))
+                ahora = datetime.now(timezone.utc)
+                delta = ahora - ultima
+                if delta.total_seconds() < 3600:
+                    tiempo = "hace menos de 1 hora"
+                elif delta.total_seconds() < 7200:
+                    tiempo = "hace 1 hora"
+                elif delta.total_seconds() < 86400:
+                    horas = int(delta.total_seconds() // 3600)
+                    tiempo = f"hace {horas} horas"
+                else:
+                    dias = int(delta.total_seconds() // 86400)
+                    tiempo = f"hace {dias} días"
+                lines.append(f"📅 Precios actualizados {tiempo}")
+            except:
+                pass
+
+    lines.append("\n↩️ Escribe otro medicamento para comparar")
+    return "\n".join(lines)
+
 @app.route("/webhook", methods=["POST"])
 def whatsapp_webhook():
     resp = MessagingResponse()
@@ -46,9 +132,7 @@ def whatsapp_webhook():
             msg.body("Por favor, envía el nombre de un medicamento.")
             return Response(str(resp), mimetype="application/xml")
 
-        if incoming_msg.lower().startswith("/medicamento"):
-            incoming_msg = incoming_msg[len("/medicamento"):].strip()
-
+        # Normalizar (usando Claude)
         resultado = normalizer.normalizar(incoming_msg)
         if "error" in resultado:
             msg.body(f"❌ Error: {resultado['error']}")
@@ -57,88 +141,31 @@ def whatsapp_webhook():
         nombre_generico = resultado.get('nombre_generico', '').lower()
         nombre_ingresado = resultado.get('nombre_ingresado', incoming_msg)
 
-        # 1. Buscar con nombre genérico (lo que Claude devuelve) - solo últimas 24h
+        # 1. Buscar con nombre genérico - últimas 24h
         precios = get_resumen(nombre_generico)
 
-        # 2. Si no hay, intentar con el nombre que el usuario escribió - últimas 24h
+        # 2. Si no hay, intentar con el nombre que el usuario escribió
         if not precios and nombre_ingresado:
             logging.info(f"Fallback: buscando con nombre ingresado: {nombre_ingresado}")
             precios = get_resumen(nombre_ingresado.lower())
 
+        # ---- NUEVA LÓGICA: SEPARAR FARMACIAS FÍSICAS Y DELIVERY ----
         if precios:
-            # ---- NUEVA LÓGICA: SEPARAR FARMACIAS FÍSICAS Y DELIVERY ----
             farmacias = []
             delivery = []
             for p in precios:
-                fuente = p.get('fuente', 'farmacia').lower()
-                # Incluir tus fuentes reales
+                fuente = p.get('fuente', '').lower()
                 if fuente in ['rappi', 'ubereats', 'delivery', 'agente_rappi', 'agente_ubereats']:
                     delivery.append(p)
                 else:
                     farmacias.append(p)
 
-            # Ordenar cada grupo por precio (menor a mayor)
+            # Ordenar por precio (menor a mayor)
             farmacias.sort(key=lambda x: x['precio'])
             delivery.sort(key=lambda x: x['precio'])
 
-            # Construir respuesta
-            respuesta = f"💊 *{nombre_generico.title()}*\n\n"
-
-            # ---- 1. FARMACIAS FÍSICAS ----
-            if farmacias:
-                respuesta += "📍 *Farmacias cercanas:*\n"
-                for i, p in enumerate(farmacias, 1):
-                    linea = f"{i}. {p['farmacia']} — ${p['precio']:.2f}"
-                    if p.get('precio_promo'):
-                        linea += f"\n   🏷️ Promo: ${p['precio_promo']:.2f} (antes)"
-                    if p.get('vigencia'):
-                        linea += f" hasta {p['vigencia']}"
-                    respuesta += linea + "\n"
-            else:
-                respuesta += "📍 No hay farmacias físicas con precios recientes.\n"
-
-            # ---- 2. DELIVERY (con generación de link automático si falta) ----
-            if delivery:
-                respuesta += "\n🛵 *También disponible a domicilio:*\n"
-                for p in delivery:
-                    # Nombre de la plataforma
-                    fuente = p['fuente'].lower()
-                    if fuente == 'rappi' or fuente == 'agente_rappi':
-                        plataforma = "Rappi"
-                        url = p.get('url')
-                        if not url:
-                            # Generar enlace de búsqueda
-                            busqueda = nombre_generico.replace(' ', '+')
-                            url = f"https://rappi.com.mx/search?q={busqueda}"
-                    elif fuente == 'ubereats' or fuente == 'agente_ubereats':
-                        plataforma = "Uber Eats"
-                        url = p.get('url')
-                        if not url:
-                            busqueda = nombre_generico.replace(' ', '+')
-                            url = f"https://ubereats.com/mx/search?q={busqueda}"
-                    else:
-                        plataforma = "Delivery"
-                        url = p.get('url') or "#"
-                    
-                    linea = f"• {plataforma} ({p['farmacia']}) — ${p['precio']:.2f}"
-                    if url:
-                        linea += f"\n  ⏱️ 25-35 min · 🔗 Pedir aquí: {url}"
-                    respuesta += linea + "\n"
-
-            # ---- 3. ANTIGÜEDAD DE LOS PRECIOS ----
-            if precios and precios[0].get('fecha'):
-                try:
-                    ts = datetime.fromisoformat(precios[0]['fecha'])
-                    delta = datetime.now() - ts
-                    horas = int(delta.total_seconds() // 3600)
-                    if horas < 1:
-                        respuesta += f"\n📅 Precios actualizados hace menos de 1 hora"
-                    else:
-                        respuesta += f"\n📅 Precios actualizados hace {horas} horas"
-                except:
-                    pass
-
-            respuesta += "\n↩️ Escribe otro medicamento para comparar"
+            # Construir respuesta con el nuevo formato
+            respuesta = formatear_respuesta(nombre_generico, farmacias, delivery)
             msg.body(respuesta)
 
         else:
@@ -168,6 +195,7 @@ def whatsapp_webhook():
                 respuesta += "\n↩️ Escribe otro medicamento para comparar"
                 msg.body(respuesta)
             else:
+                # ---- FALBACK RÁPIDO (menos de 5 segundos) ----
                 ficha = f"📋 *Ficha de {nombre_ingresado.title()}*\n\n"
                 ficha += f"*Nombre genérico:* {resultado.get('nombre_generico', 'No disponible')}\n"
                 ficha += f"*Uso principal:* {resultado.get('uso_principal', 'No disponible')}\n"
