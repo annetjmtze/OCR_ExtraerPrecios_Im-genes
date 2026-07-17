@@ -132,7 +132,8 @@ def normalizar_texto(texto: str) -> str:
 # ============================================================
 def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     medicamento_norm = normalizar_texto(medicamento)
-    fecha_limite = (datetime.now(timezone.utc) - timedelta(hours=horas)).isoformat()
+    # Generar fecha límite en UTC sin offset
+    fecha_limite = (datetime.utcnow() - timedelta(hours=horas)).isoformat()
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -153,7 +154,6 @@ def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     rows = cursor.fetchall()
     conn.close()
     
-    # En PostgreSQL ya son dict; en SQLite convertimos Row a dict
     if IS_PROD:
         return rows
     else:
