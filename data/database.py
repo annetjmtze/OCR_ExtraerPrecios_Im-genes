@@ -1,43 +1,30 @@
 import os
 import sqlite3
 import psycopg
-from psycopg.rows import dict_row          # Para obtener filas como diccionarios en PostgreSQL
+from psycopg.rows import dict_row
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any
 import re
 import unicodedata
 
 # ============================================================
-# CONFIGURACIÓN: detectar entorno automáticamente
+# CONFIGURACIÓN
 # ============================================================
 DATABASE_URL = os.getenv("DATABASE_URL")
 IS_PROD = DATABASE_URL is not None
-
-# Ruta de SQLite (solo para desarrollo local)
 DB_PATH = "data/precios.db"
 
-# ============================================================
-# CONEXIÓN: PostgreSQL o SQLite según entorno
-# ============================================================
 def get_connection():
-    """Devuelve conexión a PostgreSQL (con row_factory=dict_row) o SQLite."""
     if IS_PROD:
-        # PostgreSQL con row_factory para obtener diccionarios directamente
         return psycopg.connect(DATABASE_URL, row_factory=dict_row)
     else:
-        # SQLite local (fallback)
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         return conn
 
-# ============================================================
-# INICIALIZAR TABLA (funciona en ambos motores)
-# ============================================================
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
-    
-    # SQL compatible con PostgreSQL y SQLite
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS precios (
             id SERIAL PRIMARY KEY,
@@ -54,13 +41,16 @@ def init_db():
             fecha TEXT NOT NULL
         )
     ''')
-    
-    # Índices (funcionan en ambos)
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_medicamento ON precios(medicamento)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_fecha ON precios(fecha)')
-    
     conn.commit()
     conn.close()
+
+def normalizar_texto(texto: str) -> str:
+    texto = texto.lower().strip()
+    texto = ''.join(c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn')
+    texto = re.sub(r'\s+', ' ', texto)
+    return texto
 
 # ============================================================
 # GUARDAR PRECIO (compatible con ambos motores)
@@ -71,11 +61,24 @@ def save_precio(data: Dict[str, Any]):
         if field not in data or data[field] is None:
             raise ValueError(f"Campo '{field}' obligatorio")
     
+    # ── Convertir fecha al formato adecuado según motor ──
+    fecha_str = data['fecha']
+    if not IS_PROD:
+        # SQLite: eliminar zona horaria y microsegundos
+        # Quitar 'Z' o '+00:00'
+        fecha_str = fecha_str.replace('Z', '').replace('+00:00', '')
+        # Quitar microsegundos (si existen)
+        if '.' in fecha_str:
+            fecha_str = fecha_str.split('.')[0]
+        # Reemplazar 'T' por espacio
+        fecha_str = fecha_str.replace('T', ' ')
+        # Ahora es 'YYYY-MM-DD HH:MM:SS'
+    # Si es PostgreSQL, se mantiene el formato ISO con zona
+    
     conn = get_connection()
     cursor = conn.cursor()
     
     if IS_PROD:
-        # PostgreSQL usa %s como placeholder
         cursor.execute('''
             INSERT INTO precios (
                 medicamento, nombre_raw, farmacia, ciudad, precio, precio_promo,
@@ -92,10 +95,9 @@ def save_precio(data: Dict[str, Any]):
             data.get('url'),
             data.get('imagen_url'),
             data['fuente'],
-            data['fecha']
+            fecha_str  # Usar la fecha convertida
         ))
     else:
-        # SQLite usa ? como placeholder
         cursor.execute('''
             INSERT INTO precios (
                 medicamento, nombre_raw, farmacia, ciudad, precio, precio_promo,
@@ -112,39 +114,30 @@ def save_precio(data: Dict[str, Any]):
             data.get('url'),
             data.get('imagen_url'),
             data['fuente'],
-            data['fecha']
+            fecha_str
         ))
     
     conn.commit()
     conn.close()
 
 # ============================================================
-# NORMALIZACIÓN (sin cambios)
-# ============================================================
-def normalizar_texto(texto: str) -> str:
-    texto = texto.lower().strip()
-    texto = ''.join(c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn')
-    texto = re.sub(r'\s+', ' ', texto)
-    return texto
-
-# ============================================================
 # BÚSQUEDA PRINCIPAL (últimas 24 horas)
 # ============================================================
 def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     medicamento_norm = normalizar_texto(medicamento)
-    # Generar fecha límite en UTC sin offset
-    fecha_limite = (datetime.utcnow() - timedelta(hours=horas)).isoformat()
-    
     conn = get_connection()
     cursor = conn.cursor()
     
     if IS_PROD:
+        fecha_limite = (datetime.utcnow() - timedelta(hours=horas)).isoformat()
         cursor.execute('''
             SELECT * FROM precios
             WHERE LOWER(medicamento) LIKE %s AND fecha >= %s
             ORDER BY fecha DESC
         ''', (f'%{medicamento_norm}%', fecha_limite))
     else:
+        # SQLite: fecha límite en 'YYYY-MM-DD HH:MM:SS'
+        fecha_limite = (datetime.utcnow() - timedelta(hours=horas)).strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute('''
             SELECT * FROM precios
             WHERE LOWER(medicamento) LIKE ? AND fecha >= ?
@@ -159,18 +152,16 @@ def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     else:
         return [dict(row) for row in rows]
 
+# ============================================================
+# RESUMEN (24h)
+# ============================================================
 def get_resumen(medicamento: str) -> List[Dict[str, Any]]:
-    """Alias de get_precios con 24 horas por defecto."""
     return get_precios(medicamento, horas=24)
 
 # ============================================================
-# BÚSQUEDA HISTÓRICA (sin límite de tiempo)
+# HISTÓRICO (sin límite de tiempo)
 # ============================================================
 def get_last_precios(medicamento: str, limit: int = 5) -> List[Dict[str, Any]]:
-    """
-    Devuelve los últimos `limit` registros del medicamento, sin filtrar por fecha.
-    Útil para mostrar datos cuando no hay actualizaciones recientes.
-    """
     medicamento_norm = normalizar_texto(medicamento)
     conn = get_connection()
     cursor = conn.cursor()
@@ -198,9 +189,6 @@ def get_last_precios(medicamento: str, limit: int = 5) -> List[Dict[str, Any]]:
     else:
         return [dict(row) for row in rows]
 
-# ============================================================
-# CONTAR REGISTROS (útil para migración)
-# ============================================================
 def count_precios() -> int:
     conn = get_connection()
     cursor = conn.cursor()
@@ -208,3 +196,31 @@ def count_precios() -> int:
     count = cursor.fetchone()[0]
     conn.close()
     return count
+
+def contar_por_fuente():
+    """
+    Cuenta cuántos registros hay por cada fuente (agente_rappi, agente_ubereats, etc.)
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    if IS_PROD:
+        cursor.execute("SELECT fuente, COUNT(*) FROM precios GROUP BY fuente")
+    else:
+        cursor.execute("SELECT fuente, COUNT(*) FROM precios GROUP BY fuente")
+    
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # Convertir a diccionario
+    resultado = {}
+    for row in rows:
+        if IS_PROD:
+            fuente = row['fuente']
+            count = row['count']
+        else:
+            fuente = row[0]
+            count = row[1]
+        resultado[fuente] = count
+    
+    return resultado
