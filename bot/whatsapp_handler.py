@@ -37,7 +37,8 @@ def formatear_respuesta(nombre_generico: str, farmacias: list, delivery: list) -
     # ---- 1. FARMACIAS FÍSICAS ----
     if farmacias:
         lines.append("📍 *Farmacias cercanas:*")
-        for i, p in enumerate(farmacias, 1):
+        # Limitar a 10 para no saturar
+        for i, p in enumerate(farmacias[:10], 1):
             precio = p['precio']
             farmacia = p['farmacia']
             linea = f"{i}. {farmacia} — ${precio:.2f}"
@@ -53,7 +54,8 @@ def formatear_respuesta(nombre_generico: str, farmacias: list, delivery: list) -
     # ---- 2. DELIVERY ----
     if delivery:
         lines.append("🛵 *También disponible a domicilio:*")
-        for p in delivery:
+        # Limitar a 3 para no saturar
+        for p in delivery[:3]:
             # Determinar plataforma
             fuente = p['fuente'].lower()
             if 'rappi' in fuente:
@@ -141,77 +143,58 @@ def whatsapp_webhook():
         nombre_generico = resultado.get('nombre_generico', '').lower()
         nombre_ingresado = resultado.get('nombre_ingresado', incoming_msg).lower()
 
-        # ---- BUSCAR PRECIOS CON AMBOS NOMBRES ----
-        # 1. Buscar con nombre genérico (ej: acetaminofeno)
-        precios = get_resumen(nombre_generico)
-        # 2. Buscar con el nombre que el usuario escribió (ej: paracetamol)
-        precios_original = get_resumen(nombre_ingresado)
+        # ---- 1. BUSCAR PRECIOS RECIENTES (últimas 24h) ----
+        precios_recientes = get_resumen(nombre_generico) + get_resumen(nombre_ingresado)
 
-        # Combinar ambas listas evitando duplicados (clave: farmacia+precio+url)
-        combined = []
-        seen = set()
-        for p in precios + precios_original:
-            key = (p.get('farmacia'), p.get('precio'), p.get('url'))
-            if key not in seen:
-                seen.add(key)
-                combined.append(p)
+        # ---- 2. BUSCAR HISTÓRICOS (sin límite de tiempo) para delivery ----
+        # Si no hay delivery reciente, buscar delivery histórico
+        historicos = []
+        if not any(p.get('fuente', '').lower() in ['agente_rappi', 'agente_ubereats'] for p in precios_recientes):
+            # Buscar delivery histórico (últimos 3)
+            hist_delivery = get_last_precios(nombre_generico, limit=10)
+            hist_delivery += get_last_precios(nombre_ingresado, limit=10)
+            # Filtrar solo delivery
+            historicos = [p for p in hist_delivery if p.get('fuente', '').lower() in ['agente_rappi', 'agente_ubereats']]
+            # Eliminar duplicados
+            seen = set()
+            unique_historicos = []
+            for p in historicos:
+                key = (p.get('farmacia'), p.get('precio'), p.get('url'))
+                if key not in seen:
+                    seen.add(key)
+                    unique_historicos.append(p)
+            historicos = unique_historicos[:5]  # Limitar a 5
 
-        precios = combined
+        # ---- 3. COMBINAR RECIENTES + HISTÓRICOS (para delivery) ----
+        # Mantener precios_recientes para farmacias físicas
+        # Para delivery: usar recientes + históricos (si no hay recientes)
+        delivery_recientes = [p for p in precios_recientes if p.get('fuente', '').lower() in ['agente_rappi', 'agente_ubereats']]
+        if not delivery_recientes:
+            # Usar históricos de delivery
+            delivery = historicos
+        else:
+            delivery = delivery_recientes
 
-        # ---- SI HAY PRECIOS RECIENTES ----
-        if precios:
-            farmacias = []
-            delivery = []
-            for p in precios:
-                fuente = p.get('fuente', '').lower()
-                if fuente in ['rappi', 'ubereats', 'delivery', 'agente_rappi', 'agente_ubereats']:
-                    delivery.append(p)
-                else:
-                    farmacias.append(p)
+        # Farmacias físicas: solo recientes
+        farmacias = [p for p in precios_recientes if p.get('fuente', '').lower() not in ['agente_rappi', 'agente_ubereats']]
 
-            # Ordenar por precio (menor a mayor)
-            farmacias.sort(key=lambda x: x['precio'])
-            delivery.sort(key=lambda x: x['precio'])
+        # ---- 4. ORDENAR ----
+        farmacias.sort(key=lambda x: x['precio'])
+        delivery.sort(key=lambda x: x['precio'])
 
-            # Construir respuesta con el formato requerido
+        # ---- 5. SI HAY PRECIOS (físicas o delivery) ----
+        if farmacias or delivery:
             respuesta = formatear_respuesta(nombre_generico, farmacias, delivery)
             msg.body(respuesta)
-
         else:
-            # ---- SIN PRECIOS RECIENTES: BUSCAR HISTÓRICOS ----
-            historicos = get_last_precios(nombre_generico, limit=5)
-            if not historicos and nombre_ingresado:
-                historicos = get_last_precios(nombre_ingresado, limit=5)
-
-            if historicos:
-                respuesta = f"⚠️ *No hay precios actualizados en las últimas 24 horas.*\n"
-                respuesta += f"Mostrando los últimos *{len(historicos)}* registros disponibles:\n\n"
-                for i, p in enumerate(historicos, 1):
-                    linea = f"{i}. {p['farmacia']} — ${p['precio']:.2f}"
-                    if p.get('precio_promo'):
-                        linea += f"\n ️ Promo: ${p['precio_promo']:.2f} (antes)"
-                    if p.get('vigencia'):
-                        linea += f"\n Válido hasta: {p['vigencia']}"
-                    respuesta += linea + "\n"
-                if historicos and historicos[0].get('fecha'):
-                    try:
-                        ts = datetime.fromisoformat(historicos[0]['fecha'])
-                        delta = datetime.now() - ts
-                        horas = int(delta.total_seconds() // 3600)
-                        respuesta += f"\n Última actualización hace {horas} horas"
-                    except:
-                        pass
-                respuesta += "\n↩️ Escribe otro medicamento para comparar"
-                msg.body(respuesta)
-            else:
-                # ---- FALBACK RÁPIDO (menos de 5 segundos) ----
-                ficha = f"📋 *Ficha de {nombre_ingresado.title()}*\n\n"
-                ficha += f"*Nombre genérico:* {resultado.get('nombre_generico', 'No disponible')}\n"
-                ficha += f"*Uso principal:* {resultado.get('uso_principal', 'No disponible')}\n"
-                receta = "Sí" if resultado.get('requiere_receta') else "No"
-                ficha += f"*¿Requiere receta?* {receta}\n"
-                ficha += "\n⚠️ Aún no tenemos precios para este medicamento. Estamos actualizando nuestra base de datos — intenta de nuevo mañana o busca otro medicamento."
-                msg.body(ficha)
+            # ---- SIN PRECIOS: FALLBACK ----
+            ficha = f"📋 *Ficha de {nombre_ingresado.title()}*\n\n"
+            ficha += f"*Nombre genérico:* {resultado.get('nombre_generico', 'No disponible')}\n"
+            ficha += f"*Uso principal:* {resultado.get('uso_principal', 'No disponible')}\n"
+            receta = "Sí" if resultado.get('requiere_receta') else "No"
+            ficha += f"*¿Requiere receta?* {receta}\n"
+            ficha += "\n⚠️ Aún no tenemos precios para este medicamento. Estamos actualizando nuestra base de datos — intenta de nuevo mañana o busca otro medicamento."
+            msg.body(ficha)
 
         # --- NOTIFICACIÓN TELEGRAM (80%) ---
         if increment_and_check_limit():
