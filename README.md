@@ -1,4 +1,4 @@
-﻿# 🤖 Dr. Ahorro Bot
+﻿# 🤖 Dr. Ahorro Bot (Arquitectura de Producción)
 
 > Bot conversacional multicanal para consultar información y precios públicos de medicamentos en México utilizando **Claude (Anthropic)** como motor de inteligencia artificial y **Web Scraping** para obtener precios reales desde farmacias con sitios web.
 
@@ -9,14 +9,14 @@
 - [🚀 Características](#-características)
 - [🛠️ Tecnologías](#️-tecnologías)
 - [🧠 Arquitectura](#-arquitectura)
+- [Componentes Principales](#componentes-principales)
 - [📁 Estructura del Proyecto](#-estructura-del-proyecto)
 - [💾 Base de Datos (Producción y Desarrollo)](#-base-de-datos-producción-y-desarrollo)
-- [🔄 Migración de Datos (SQLite → PostgreSQL)](#-migración-de-datos-sqlite--postgresql)
 - [⏰ Tareas Programadas (Scheduler)](#-tareas-programadas-scheduler)
-- [ Requisitos Previos](#-requisitos-previos)
+- [📋 Requisitos Previos](#-requisitos-previos)
 - [⚙️ Instalación y Configuración](#️-instalación-y-configuración)
 - [🚀 Uso](#-uso)
-- [ Variables de Entorno](#-variables-de-entorno)
+- [🔧 Variables de Entorno](#-variables-de-entorno)
 - [🧪 Posibles Errores y Soluciones](#-posibles-errores-y-soluciones)
 - [🚧 Mejoras Futuras](#-mejoras-futuras)
 - [🙏 Créditos](#-créditos)
@@ -26,28 +26,19 @@
 
 # 🚀 Características
 
-- ✅ Funciona tanto en **Telegram** como en **WhatsApp**.
-- ✅ Utiliza **Claude (Anthropic)** para interpretar consultas sobre medicamentos.
-- ✅ Obtiene precios públicos mediante **Web Scraping** desde farmacias con sitios web.
-- ✅ Extrae precios de plataformas de delivery como **Rappi** y **Uber Eats** usando agentes automatizados.
-- ✅ Ejecuta tareas de recolección de datos de forma automática y programada.
+- ✅ **Arquitectura de Producción**: Desplegado en **Railway** con base de datos **PostgreSQL** y tareas programadas.
+- ✅ **Recolección Automatizada**: Un **scheduler (`APScheduler`)** ejecuta agentes de scraping de forma periódica para mantener los precios actualizados.
+- ✅ **Agentes de Scraping Avanzados**:
+  - **Agente Playwright**: Extrae precios de farmacias con sitios web dinámicos (JavaScript).
+  - **Agentes de Delivery**: Consulta precios en **Rappi** y **Uber Eats**.
+  - **Scrapers Legacy**: Soporte para sitios estáticos con `requests` y `BeautifulSoup`.
+- ✅ **Inteligencia Artificial**: Utiliza **Claude (Anthropic)** para normalizar los nombres de medicamentos ingresados por el usuario (ej. "Tempra" -> "Paracetamol").
 - ✅ Almacena el historial de precios en una base de datos **PostgreSQL** (producción) o **SQLite** (desarrollo).
-- ✅ Guarda los resultados del scraping en formato **JSON**.
-- ✅ Consulta automáticamente los precios registrados durante las últimas 24 horas.
-- ✅ Normaliza nombres comerciales (ej. Tempra, Aspirina, Ozempic) utilizando Claude antes de consultar la base de datos.
+- ✅ **Almacenamiento en la Nube**: Guarda capturas de pantalla de las búsquedas de Playwright en **Cloudflare R2** como evidencia.
+- ✅ **Interfaz Multicanal**: Funciona tanto en **Telegram** como en **WhatsApp** (vía Twilio).
 - ✅ Muestra un ranking de farmacias ordenado por precio.
 - ✅ Si no existen precios disponibles, responde con la ficha del medicamento y continúa buscando información.
-- ✅ Probado con usuarios reales mediante WhatsApp utilizando Twilio Sandbox.
 - ✅ Arquitectura modular y fácil de mantener.
-- ✅ Desplegado en **Railway** con base de datos PostgreSQL y tareas programadas.
-- ✅ Respuestas adaptadas al formato de cada plataforma.
-- ✅ Fácil de extender a nuevos canales como Discord o Messenger.
-- ✅ Registro automático del webhook de WhatsApp.
-- ✅ Detecta automáticamente si una farmacia publica precios en HTML estático o requiere contenido dinámico.
-- ✅ Implementa una estrategia híbrida de obtención de precios:
-- Web Scraping para sitios con precios públicos.
-- OCR para extraer precios desde imágenes cuando el HTML no los contiene.
-- ✅ Documenta automáticamente los hallazgos técnicos de cada farmacia evaluada.
 
 ---
 
@@ -76,92 +67,48 @@
 
 # 🧠 Arquitectura
 
-```text
-                     Telegram
-                         │
-                         ▼
-              ┌────────────────────┐
-              │ Telegram Handler   │
-              └─────────┬──────────┘
-                        │
-                        ▼
-            ┌────────────────────────┐
-            │ Claude (Anthropic LLM) │
-            │ Normalizador           │
-            └─────────┬──────────────┘
-                      │
-                      │◄────────────────────────────────────────┐
-          ┌───────────┴──────────────┐                          │
-          │                          │                          │
-          ▼                          ▼                          │
-   Web Scraping                 OCR                             │
-(Requests + BS4)        (Tesseract + Claude)                    │
-          │                          │                          │
-          └───────────┬──────────────┘                          │
-                      ▼                                         │
-            ┌──────────────────┐                                │
-            │  Base de Datos   │◄────────────────────────────────┘
-            │ (PG en Prod /    │
-            │  SQLite en Dev)  │
-            └──────────────────┘
-                      │
-                      ▼
-            WhatsApp / Telegram
+El sistema se divide en dos servicios principales que corren de forma independiente en producción (Railway):
+
+1.  **Servicio Web (`main.py`)**: Una aplicación Flask que expone un webhook para recibir mensajes de WhatsApp y Telegram. Se encarga de procesar las consultas de los usuarios en tiempo real.
+2.  **Servicio de Tareas (`scheduler.py`)**: Un proceso que ejecuta tareas de scraping de forma periódica para recolectar y actualizar los precios de los medicamentos en la base de datos.
+
+```mermaid
+graph TD
+    subgraph "Servicio Web (main.py)"
+        Usuario -- "Consulta medicamento" --> Canales[WhatsApp / Telegram]
+        Canales --> Webhook[Webhook Flask]
+        Webhook --> LLM[LLM: Normalizador Claude]
+        LLM --> DB[(Base de Datos<br>PostgreSQL)]
+        DB -- "Precios encontrados" --> Webhook
+        Webhook -- "Respuesta con precios" --> Usuario
+    end
+
+    subgraph "Servicio de Tareas (scheduler.py)"
+        Scheduler[APScheduler] -- "Cada 6 horas" --> Agentes
+        Agentes --> Playwright[Agente Playwright]
+        Agentes --> Delivery[Agentes Delivery<br>Rappi/Uber Eats]
+        Playwright --> FarmaciasWeb[Sitios Web de Farmacias]
+        Delivery --> APIsDelivery[APIs de Delivery]
+        Playwright -- "Guarda precio" --> DB
+        Delivery -- "Guarda precio" --> DB
+        Playwright -- "Guarda screenshot" --> R2[(Cloudflare R2)]
+    end
+
+    style DB fill:#d5f5e3,stroke:#27ae60,stroke-width:2px
+    style R2 fill:#fdebd0,stroke:#f39c12,stroke-width:2px
 ```
----
-
-## Flujo de consulta
-
-```text
-Usuario
-   │
-   ▼
-WhatsApp / Telegram
-   │
-   ▼
-Claude normaliza el medicamento
-(Ej. "Tempra" → "Paracetamol 500 mg")
-   │
-   ▼
-Consulta Base de Datos
-(precios últimas 24 horas)
-   │
-   ├───────────────┐
-   │               │
-Hay precios      No hay precios
-   │               │
-   ▼               ▼
-Ranking          Ficha del medicamento
-de farmacias     + "Buscando precios..."
-```
----
-
-# 💬 Flujo de respuesta del bot
-
-Cuando un usuario envía el nombre de un medicamento, el sistema sigue el siguiente proceso:
-
-1. Claude normaliza el nombre del medicamento.
-2. Se consulta la base de datos SQLite.
-3. Si existen precios registrados durante las últimas 24 horas:
-   - Se ordenan de menor a mayor.
-   - Se muestran promociones disponibles.
-   - Se indica cuándo fueron actualizados.
-4. Si no existen registros:
-   - Claude genera una ficha del medicamento.
-   - El bot informa que continúa buscando precios.
-
-Este flujo permite responder incluso cuando todavía no existe información de precios para un medicamento.
 
 ---
 
-### Principio de diseño
+# Componentes Principales
 
-El sistema está dividido en módulos independientes.
-
-- Los **handlers** reciben los mensajes desde Telegram y WhatsApp.
-- El **normalizador** procesa la consulta mediante Claude.
-- El **módulo de Web Scraping** consulta precios públicos cuando es necesario.
-- Los resultados del scraping se almacenan en archivos JSON para su reutilización y análisis.
+1.  **Handlers (`bot/`)**: Módulos que gestionan la comunicación específica para cada canal (Telegram, WhatsApp).
+2.  **Normalizador (`llm/`)**: Usa Claude para interpretar el texto del usuario y extraer el nombre genérico del medicamento.
+3.  **Base de Datos (`data/database.py`)**: Abstracción que se conecta a PostgreSQL en producción (`DATABASE_URL`) o a un archivo SQLite local para desarrollo.
+4.  **Scheduler (`scheduler.py`)**: Orquesta la ejecución periódica de los agentes de scraping.
+5.  **Agentes (`data/agents/`)**:
+    -   `playwright_agent.py`: Navega sitios de farmacias que requieren JavaScript, toma capturas de pantalla y extrae precios.
+    -   `rappi_agent.py` / `ubereats_agent.py`: Simulan la interacción con las plataformas de delivery para obtener precios.
 
 ---
 
