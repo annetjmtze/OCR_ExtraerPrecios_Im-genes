@@ -1,27 +1,20 @@
 FROM python:3.14-slim
 
-# Instalar dependencias del sistema (incluyendo algunas que Playwright necesita)
+# Instalar Chromium del sistema (para tener dependencias, pero Playwright usará su propia copia)
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
+    chromium \
     && rm -rf /var/lib/apt/lists/*
 
-# NO instalar Chromium desde apt, dejamos que Playwright lo maneje
+# No definir PLAYWRIGHT_BROWSERS_PATH (usar el directorio por defecto)
 
 WORKDIR /app
 
-# Copiar requirements e instalar
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar Playwright y los browsers (esto descarga en ~/.cache/ms-playwright)
+# Instalar los browsers de Playwright en el directorio por defecto (~/.cache/ms-playwright)
 RUN playwright install chromium
 
-# Copiar el resto del código
 COPY . .
-
-# Limpiar cualquier variable de entorno que pueda interferir
-ENV PLAYWRIGHT_BROWSERS_PATH=""
-ENV CHROME_PATH=""
 
 CMD ["python", "scheduler.py"]
