@@ -1,5 +1,9 @@
-import asyncio
 import os
+# ── FORZAR USO DE CHROME ──
+os.environ['PLAYWRIGHT_BROWSERS_PATH'] = '/usr/bin'
+os.environ['CHROME_PATH'] = '/usr/bin/google-chrome-stable'
+
+import asyncio
 import sys
 import json
 import re
@@ -8,7 +12,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 
-from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeout
+from playwright.async_api import async_playwright
 from dotenv import load_dotenv
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -31,16 +35,21 @@ class RappiAgent:
 
     async def _load_cookies(self, context):
         if not os.path.exists(self.cookies_file):
-            raise FileNotFoundError(f"No se encontró el archivo: {self.cookies_file}")
-        with open(self.cookies_file, 'r') as f:
-            cookies = json.load(f)
-        await context.add_cookies(cookies)
-        logger.info(f"🍪 {len(cookies)} cookies cargadas.")
+            logger.warning(f"⚠️ No se encontró archivo de cookies: {self.cookies_file}. Continuando sin autenticación.")
+            return
+        try:
+            with open(self.cookies_file, 'r') as f:
+                cookies = json.load(f)
+            await context.add_cookies(cookies)
+            logger.info(f"🍪 {len(cookies)} cookies cargadas.")
+        except Exception as e:
+            logger.warning(f"⚠️ Error cargando cookies: {e}. Continuando sin autenticación.")
 
     async def search_medication(self, medication: str) -> Optional[Dict[str, Any]]:
         async with async_playwright() as p:
+            # ── USAR GOOGLE CHROME ──
             browser = await p.chromium.launch(
-                channel="chrome",
+                channel="chrome",  # usa Chrome del sistema
                 headless=self.headless,
                 args=["--disable-blink-features=AutomationControlled"]
             )
@@ -111,7 +120,7 @@ class RappiAgent:
                 except:
                     nombre = medication
 
-                # ── LINK DEL PRODUCTO (corregido) ──
+                # ── LINK DEL PRODUCTO ──
                 href = None
 
                 # 1. Método principal: extraer ID de la imagen (UUID)
@@ -120,13 +129,11 @@ class RappiAgent:
                     if img:
                         src = await img.get_attribute("src")
                         if src:
-                            # Buscar UUID en la URL de la imagen
                             match = re.search(r'/products/([a-f0-9-]+)\.', src)
                             if match:
                                 product_id = match.group(1)
-                                # Generar slug a partir del nombre
                                 slug = nombre.lower().replace(' ', '-')
-                                slug = re.sub(r'[^a-z0-9-]', '', slug)  # Eliminar caracteres especiales
+                                slug = re.sub(r'[^a-z0-9-]', '', slug)
                                 href = f"https://www.rappi.com.mx/p/{slug}-{product_id}"
                                 logger.info(f"✅ Link construido desde imagen: {href}")
                 except Exception as e:
@@ -146,7 +153,6 @@ class RappiAgent:
                 if not href:
                     try:
                         logger.info("🖱️ Intentando obtener link mediante clic en el producto...")
-                        # Hacer clic en el contenedor del producto
                         async with page.expect_navigation(timeout=15000) as nav_info:
                             await product.click()
                         href = page.url
@@ -162,11 +168,9 @@ class RappiAgent:
 
                 # ── FILTRO FINAL: descartar enlaces no válidos ──
                 if href:
-                    # Si contiene palabras clave de icono o no tiene '/p/', lo descartamos
                     if 'add-product' in href or 'icon' in href or '/p/' not in href:
                         logger.warning(f"⚠️ Enlace descartado (no válido): {href}")
                         href = None
-                    # Completar URL si es relativa
                     elif not href.startswith("http"):
                         href = "https://www.rappi.com.mx" + href
 
@@ -192,7 +196,6 @@ class RappiAgent:
                     "imagen_url": screenshot_path
                 }
 
-                # ── Guardar en BD ──
                 if precio:
                     try:
                         save_precio({
