@@ -2,11 +2,15 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import re
+import logging
 from datetime import datetime
 import sys
 import os
-if sys.platform == 'win32':
-    sys.stdout.reconfigure(encoding='utf-8')
+from urllib.parse import urlparse
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger("web_scraper")
 
 # Añadir ruta para importar database.py desde data/
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -23,33 +27,43 @@ def limpiar_precio(texto):
     except ValueError:
         return None
 
+def validar_url(url):
+    """Verifica que la URL sea válida."""
+    if not url:
+        return False
+    try:
+        r = urlparse(url)
+        return r.scheme in ('http', 'https') and bool(r.netloc)
+    except:
+        return False
+
 # -------------------- FUNCIÓN PARA GUARDAR EN BD --------------------
 def guardar_resultado(datos):
-    """
-    Guarda un resultado en la base de datos usando el schema definido.
-    datos: diccionario con los campos necesarios.
-    """
     try:
-        # Asegurar que 'fuente' esté definido
         if 'fuente' not in datos or datos['fuente'] is None:
-            datos['fuente'] = 'farmacia'  # Por defecto
+            datos['fuente'] = 'farmacia'
+        
+        # Validar URL antes de guardar
+        if datos.get('url_producto') and not validar_url(datos['url_producto']):
+            logger.warning(f"URL inválida: {datos['url_producto']} - se guardará sin URL")
+            datos['url_producto'] = None
 
         registro = {
             "medicamento": datos.get("medicamento_buscado", "desconocido"),
             "nombre_raw": datos.get("nombre_en_farmacia"),
             "farmacia": datos.get("farmacia"),
-            "ciudad": None,  # No tenemos ciudad en scraping
+            "ciudad": None,
             "precio": datos.get("precio"),
             "precio_promo": datos.get("precio_promo"),
             "vigencia": datos.get("vigencia_promo"),
-            "url": datos.get("url_producto"),  # ← Importante para delivery
-            "fuente": datos.get("fuente"),     # ← 'farmacia', 'rappi', 'ubereats'
+            "url": datos.get("url_producto"),
+            "fuente": datos.get("fuente"),
             "fecha": datos.get("fecha_consulta", datetime.now().isoformat())
         }
         save_precio(registro)
-        print(f"💾 Guardado en BD: {registro['farmacia']} - ${registro['precio']} (fuente: {registro['fuente']})")
+        logger.info(f"💾 Guardado en BD: {registro['farmacia']} - ${registro['precio']} (fuente: {registro['fuente']})")
     except Exception as e:
-        print(f"⚠️ Error al guardar en BD: {e}")
+        logger.error(f"⚠️ Error al guardar en BD: {e}")
 
 # -------------------- FARMACIAS DEL AHORRO --------------------
 def scrape_ahorro(url):
@@ -73,7 +87,6 @@ def scrape_ahorro(url):
 
         promo_elem = soup.select_one('.special-price .price')
         precio_promo = limpiar_precio(promo_elem.text) if promo_elem else None
-
         vigencia = None
 
         name_elem = soup.select_one('h1.page-title span')
@@ -89,7 +102,7 @@ def scrape_ahorro(url):
             "precio_promo": precio_promo,
             "vigencia_promo": vigencia,
             "url_producto": url,
-            "fuente": "farmacia",  # ← CAMBIADO de "scraper_web" a "farmacia"
+            "fuente": "farmacia",
             "fecha_consulta": datetime.now().isoformat()
         }
 
@@ -97,7 +110,7 @@ def scrape_ahorro(url):
             guardar_resultado(resultado)
         return resultado
     except Exception as e:
-        print(f"❌ Error en Farmacias del Ahorro: {e}")
+        logger.error(f"❌ Error en Farmacias del Ahorro: {e}")
         return None
 
 # -------------------- BENAVIDES --------------------
@@ -152,7 +165,7 @@ def scrape_benavides(url):
             "precio_promo": precio_promo,
             "vigencia_promo": vigencia,
             "url_producto": url,
-            "fuente": "farmacia",  # ← CAMBIADO
+            "fuente": "farmacia",
             "fecha_consulta": datetime.now().isoformat()
         }
 
@@ -160,10 +173,10 @@ def scrape_benavides(url):
             guardar_resultado(resultado)
         return resultado
     except Exception as e:
-        print(f"❌ Error en Farmacias Benavides: {e}")
+        logger.error(f"❌ Error en Farmacias Benavides: {e}")
         return None
 
-# -------------------- PROBEMEDIC (NUEVA) --------------------
+# -------------------- PROBEMEDIC --------------------
 def scrape_probemedic(url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
@@ -173,13 +186,24 @@ def scrape_probemedic(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        texto = soup.get_text()
-        match = re.search(r'\$(\d+\.\d{2})', texto)
-        precio = float(match.group(1)) if match else None
+        # Buscar precio en un contenedor más específico (ej. .product-price, .price)
+        price_elem = soup.select_one('.product-price, .price, .special-price, .regular-price')
+        if price_elem:
+            precio = limpiar_precio(price_elem.text)
+        else:
+            # Fallback: regex en el texto de la página (pero limitado a un área)
+            price_text = soup.select_one('.product-info') or soup.select_one('.product-details')
+            if price_text:
+                match = re.search(r'\$(\d+\.\d{2})', price_text.get_text())
+                precio = float(match.group(1)) if match else None
+            else:
+                precio = None
 
         title = soup.find('title')
         nombre = title.text.strip() if title else "Paracetamol 500mg 10 tabletas"
 
+        # Determinar medicamento desde el título
+        medicamento = "desconocido"
         if "paracetamol" in nombre.lower():
             medicamento = "paracetamol"
         elif "ibuprofeno" in nombre.lower():
@@ -188,8 +212,12 @@ def scrape_probemedic(url):
             medicamento = "fluoxetina"
         elif "diclofenaco" in nombre.lower():
             medicamento = "diclofenaco"
-        else:
-            medicamento = "desconocido"
+        elif "loratadina" in nombre.lower():
+            medicamento = "loratadina"
+        elif "metformina" in nombre.lower():
+            medicamento = "metformina"
+        elif "celecoxib" in nombre.lower():
+            medicamento = "celecoxib"
 
         resultado = {
             "medicamento_buscado": medicamento,
@@ -199,7 +227,7 @@ def scrape_probemedic(url):
             "precio_promo": None,
             "vigencia_promo": None,
             "url_producto": url,
-            "fuente": "farmacia",  # ← CAMBIADO
+            "fuente": "farmacia",
             "fecha_consulta": datetime.now().isoformat()
         }
 
@@ -207,35 +235,58 @@ def scrape_probemedic(url):
             guardar_resultado(resultado)
         return resultado
     except Exception as e:
-        print(f"❌ Error en Probemedic: {e}")
+        logger.error(f"❌ Error en Probemedic: {e}")
         return None
 
-# -------------------- RAPPI (NUEVO) --------------------
-def scrape_rappi(url):
+# -------------------- RAPPI (usando Playwright asíncrono) --------------------
+async def scrape_rappi_async(url):
     """
-    Scraper para Rappi usando Playwright (requiere instalación).
-    Ejemplo de URL: https://www.rappi.com.mx/tienda/farmacias-del-ahorro/paracetamol-500-mg-20-tabletas/p
+    Versión asíncrona para integración con el scheduler.
     """
     try:
-        from playwright.sync_api import sync_playwright
+        from playwright.async_api import async_playwright
     except ImportError:
-        print("⚠️ Playwright no instalado. Instala con: pip install playwright && playwright install")
+        logger.error("⚠️ Playwright no instalado. Instala con: pip install playwright && playwright install")
         return None
 
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, timeout=30000)
-            # Esperar a que cargue el precio
-            page.wait_for_selector('.price-value', timeout=10000)
-            precio_text = page.text_content('.price-value')
-            precio = limpiar_precio(precio_text)
+        async with async_playwright() as p:
+            # Usar Chrome real (como en los agentes)
+            browser = await p.chromium.launch(
+                channel="chrome",
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled"]
+            )
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
+            page = await context.new_page()
+            await page.goto(url, timeout=30000)
+            
+            # Esperar selectores de precio
+            try:
+                await page.wait_for_selector('.price-value, .product-price, [data-qa="product-price"]', timeout=10000)
+            except:
+                await page.wait_for_selector('span[class*="price"]', timeout=5000)
+            
+            # Intentar varios selectores
+            price_text = None
+            for selector in ['.price-value', '.product-price', '[data-qa="product-price"]', 'span[class*="price"]']:
+                try:
+                    elem = await page.query_selector(selector)
+                    if elem:
+                        price_text = await elem.inner_text()
+                        break
+                except:
+                    continue
+            
+            precio = limpiar_precio(price_text) if price_text else None
 
-            nombre_elem = page.query_selector('.product-name')
-            nombre = nombre_elem.text_content().strip() if nombre_elem else "Paracetamol"
+            name_elem = await page.query_selector('.product-name, [data-qa="product-name"]')
+            nombre = await name_elem.inner_text() if name_elem else "Paracetamol"
+            nombre = nombre.strip()
 
-            # Extraer nombre de farmacia desde la URL o título
+            # Extraer farmacia desde la URL
             if "farmacias-del-ahorro" in url:
                 farmacia = "Farmacias del Ahorro (Rappi)"
             elif "benavides" in url:
@@ -243,60 +294,7 @@ def scrape_rappi(url):
             else:
                 farmacia = "Rappi"
 
-            browser.close()
-
-            resultado = {
-                "medicamento_buscado": "paracetamol",  # Idealmente extraer desde el nombre
-                "nombre_en_farmacia": nombre,
-                "farmacia": farmacia,
-                "precio": precio,
-                "precio_promo": None,
-                "vigencia_promo": None,
-                "url_producto": url,
-                "fuente": "rappi",  # ← IMPORTANTE
-                "fecha_consulta": datetime.now().isoformat()
-            }
-
-            if precio is not None:
-                guardar_resultado(resultado)
-            return resultado
-    except Exception as e:
-        print(f"❌ Error en Rappi: {e}")
-        return None
-
-# -------------------- UBER EATS (NUEVO) --------------------
-def scrape_ubereats(url):
-    """
-    Scraper para Uber Eats usando Playwright.
-    Ejemplo de URL: https://www.ubereats.com/mx/store/farmacias-del-ahorro/...
-    """
-    try:
-        from playwright.sync_api import sync_playwright
-    except ImportError:
-        print("⚠️ Playwright no instalado. Instala con: pip install playwright && playwright install")
-        return None
-
-    try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, timeout=30000)
-            # Esperar a que cargue el precio
-            page.wait_for_selector('[data-testid="price"]', timeout=10000)
-            precio_text = page.text_content('[data-testid="price"]')
-            precio = limpiar_precio(precio_text)
-
-            nombre_elem = page.query_selector('[data-testid="product-title"]')
-            nombre = nombre_elem.text_content().strip() if nombre_elem else "Paracetamol"
-
-            if "farmacias-del-ahorro" in url:
-                farmacia = "Farmacias del Ahorro (Uber Eats)"
-            elif "benavides" in url:
-                farmacia = "Farmacias Benavides (Uber Eats)"
-            else:
-                farmacia = "Uber Eats"
-
-            browser.close()
+            await browser.close()
 
             resultado = {
                 "medicamento_buscado": "paracetamol",
@@ -306,7 +304,7 @@ def scrape_ubereats(url):
                 "precio_promo": None,
                 "vigencia_promo": None,
                 "url_producto": url,
-                "fuente": "ubereats",  # ← IMPORTANTE
+                "fuente": "rappi",
                 "fecha_consulta": datetime.now().isoformat()
             }
 
@@ -314,16 +312,86 @@ def scrape_ubereats(url):
                 guardar_resultado(resultado)
             return resultado
     except Exception as e:
-        print(f"❌ Error en Uber Eats: {e}")
+        logger.error(f"❌ Error en Rappi async: {e}")
         return None
 
-# -------------------- EJECUCIÓN PRINCIPAL --------------------
-if __name__ == "__main__":
-    # Inicializar base de datos
-    init_db()
-    print("📦 Base de datos inicializada")
+# -------------------- UBER EATS (usando Playwright asíncrono) --------------------
+async def scrape_ubereats_async(url):
+    try:
+        from playwright.async_api import async_playwright
+    except ImportError:
+        logger.error("⚠️ Playwright no instalado. Instala con: pip install playwright && playwright install")
+        return None
 
-    # Productos de Probemedic (todos funcionan)
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                channel="chrome",
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled"]
+            )
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
+            page = await context.new_page()
+            await page.goto(url, timeout=30000)
+            
+            # Esperar precio
+            try:
+                await page.wait_for_selector('[data-testid="price"], .price, [data-qa="price"]', timeout=10000)
+            except:
+                pass
+            
+            price_text = None
+            for selector in ['[data-testid="price"]', '.price', '[data-qa="price"]', 'span[class*="price"]']:
+                try:
+                    elem = await page.query_selector(selector)
+                    if elem:
+                        price_text = await elem.inner_text()
+                        break
+                except:
+                    continue
+            
+            precio = limpiar_precio(price_text) if price_text else None
+
+            name_elem = await page.query_selector('[data-testid="product-title"], .product-name, [data-qa="product-name"]')
+            nombre = await name_elem.inner_text() if name_elem else "Paracetamol"
+            nombre = nombre.strip()
+
+            if "farmacias-del-ahorro" in url:
+                farmacia = "Farmacias del Ahorro (Uber Eats)"
+            elif "benavides" in url:
+                farmacia = "Farmacias Benavides (Uber Eats)"
+            else:
+                farmacia = "Uber Eats"
+
+            await browser.close()
+
+            resultado = {
+                "medicamento_buscado": "paracetamol",
+                "nombre_en_farmacia": nombre,
+                "farmacia": farmacia,
+                "precio": precio,
+                "precio_promo": None,
+                "vigencia_promo": None,
+                "url_producto": url,
+                "fuente": "ubereats",
+                "fecha_consulta": datetime.now().isoformat()
+            }
+
+            if precio is not None:
+                guardar_resultado(resultado)
+            return resultado
+    except Exception as e:
+        logger.error(f"❌ Error en Uber Eats async: {e}")
+        return None
+
+# -------------------- EJECUCIÓN PRINCIPAL (sync) --------------------
+def main():
+    init_db()
+    logger.info("📦 Base de datos inicializada")
+
+    # Productos de Probemedic
     urls_probemedic = [
         "https://www.probemedic.mx/paracetamol-500mg-10-tabletas.html",
         "https://www.probemedic.mx/ibuprofeno-800-mg-10-tabletas.html",
@@ -334,69 +402,56 @@ if __name__ == "__main__":
         "https://www.probemedic.mx/celecoxib-200-mg-10-capsulas.html"
     ]
 
-    # Otras farmacias
     urls_otras = {
         "ahorro": "https://www.fahorro.com/paracetamol-500-mg-oral-20-tabletas-marca-del-ahorro.html",
         "benavides": "https://www.benavides.com.mx/perfalgan-paracetamol-1-ud-frasco-ampula"
     }
 
-    # URLs de ejemplo para Rappi y Uber Eats (reemplaza con las reales)
-    urls_delivery = {
-        "rappi": "https://www.rappi.com.mx/tienda/farmacias-del-ahorro/paracetamol-500-mg-20-tabletas/p",
-        "ubereats": "https://www.ubereats.com/mx/store/farmacias-del-ahorro/paracetamol-500-mg-20-tabletas"
-    }
-
     resultados = []
 
-    # Scrapear farmacias físicas
-    print("\n🔍 Scrapeando Farmacias del Ahorro...")
+    logger.info("🔍 Scrapeando Farmacias del Ahorro...")
     res_ahorro = scrape_ahorro(urls_otras["ahorro"])
     if res_ahorro:
         resultados.append(res_ahorro)
-        print("✅ Farmacias del Ahorro OK")
 
-    print("\n🔍 Scrapeando Farmacias Benavides...")
+    logger.info("🔍 Scrapeando Farmacias Benavides...")
     res_benav = scrape_benavides(urls_otras["benavides"])
     if res_benav:
         resultados.append(res_benav)
-        print("✅ Farmacias Benavides OK")
 
-    print("\n🔍 Scrapeando Probemedic...")
+    logger.info("🔍 Scrapeando Probemedic...")
     for url in urls_probemedic:
-        print(f"  - {url.split('/')[-1]}...")
+        logger.info(f"  - {url.split('/')[-1]}...")
         res_prob = scrape_probemedic(url)
         if res_prob:
             resultados.append(res_prob)
-            print(f"    ✅ OK: ${res_prob['precio']}")
+            logger.info(f"    ✅ OK: ${res_prob['precio']}")
         else:
-            print(f"    ❌ Falló")
-
-    # Scrapear delivery (Rappi y Uber Eats) - comentado por ahora
-    # print("\n🔍 Scrapeando Rappi...")
-    # res_rappi = scrape_rappi(urls_delivery["rappi"])
-    # if res_rappi:
-    #     resultados.append(res_rappi)
-    #     print("✅ Rappi OK")
-
-    # print("\n🔍 Scrapeando Uber Eats...")
-    # res_uber = scrape_ubereats(urls_delivery["ubereats"])
-    # if res_uber:
-    #     resultados.append(res_uber)
-    #     print("✅ Uber Eats OK")
+            logger.warning(f"    ❌ Falló")
 
     # Guardar en JSON
     if resultados:
         os.makedirs("data/scrapers", exist_ok=True)
         with open("data/scrapers/resultados_farmacias.json", "w", encoding="utf-8") as f:
             json.dump(resultados, f, indent=2, ensure_ascii=False)
-        print(f"\n📁 {len(resultados)} resultados guardados en data/scrapers/resultados_farmacias.json")
-        print("\n📋 Resumen:")
+        logger.info(f"📁 {len(resultados)} resultados guardados en data/scrapers/resultados_farmacias.json")
+        logger.info("📋 Resumen:")
         for r in resultados:
-            print(f"  - {r['farmacia']}: ${r['precio']} - {r['nombre_en_farmacia']} (fuente: {r['fuente']})")
+            logger.info(f"  - {r['farmacia']}: ${r['precio']} - {r['nombre_en_farmacia']} (fuente: {r['fuente']})")
     else:
-        print("❌ No se obtuvo ningún resultado.")
+        logger.warning("❌ No se obtuvo ningún resultado.")
 
-    # Verificar registros en BD por fuente
-    print("\n📊 Registros en base de datos por fuente:")
-    for row in contar_por_fuente():
-        print(f"  {row['fuente']}: {row['total']}")
+    # Verificar registros en BD por fuente (CORREGIDO)
+    logger.info("📊 Registros en base de datos por fuente:")
+    try:
+        fuente_counts = contar_por_fuente()
+        if fuente_counts:
+            for fuente, total in fuente_counts.items():
+                logger.info(f"  {fuente}: {total}")
+        else:
+            logger.info("  No hay registros.")
+    except Exception as e:
+        logger.error(f"Error al contar por fuente: {e}")
+
+if __name__ == "__main__":
+    main()
