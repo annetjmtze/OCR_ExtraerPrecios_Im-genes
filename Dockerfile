@@ -1,32 +1,27 @@
 FROM python:3.14-slim
 
-# Instalar dependencias del sistema y Google Chrome
+# Instalar dependencias del sistema (incluyendo algunas que Playwright necesita)
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Descargar e instalar Google Chrome
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
+# NO instalar Chromium desde apt, dejamos que Playwright lo maneje
 
 WORKDIR /app
 
-# Copiar requirements e instalar dependencias de Python
+# Copiar requirements e instalar
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar Playwright (para que tenga los controladores necesarios, pero usaremos Chrome del sistema)
-RUN playwright install
+# Instalar Playwright y los browsers (esto descarga en ~/.cache/ms-playwright)
+RUN playwright install chromium
 
-# Variables de entorno para que Playwright use Chrome del sistema
-ENV PLAYWRIGHT_BROWSERS_PATH=/usr/bin
-ENV CHROME_PATH=/usr/bin/google-chrome-stable
-
-# Copiar el código fuente
+# Copiar el resto del código
 COPY . .
 
-# Comando por defecto (se sobrescribe en Railway si es necesario)
+# Limpiar cualquier variable de entorno que pueda interferir
+ENV PLAYWRIGHT_BROWSERS_PATH=""
+ENV CHROME_PATH=""
+
 CMD ["python", "scheduler.py"]
