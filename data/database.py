@@ -2,7 +2,7 @@ import os
 import sqlite3
 import psycopg
 from psycopg.rows import dict_row
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any
 import re
 import unicodedata
@@ -16,10 +16,10 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 IS_PROD = DATABASE_URL is not None
 DB_PATH = "data/precios.db"
 
-# Límite absoluto para cualquier medicamento sin rango definido
 PRECIO_MAXIMO_ABSOLUTO = 2000.0
-# Umbral de similitud para validar nombre_raw vs medicamento
-UMBRAL_SIMILITUD = 0.6
+UMBRAL_SIMILITUD = 0.3
+
+logging.basicConfig(level=logging.INFO)
 
 def get_connection():
     if IS_PROD:
@@ -32,7 +32,6 @@ def get_connection():
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
-    # Tabla de precios
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS precios (
             id SERIAL PRIMARY KEY,
@@ -52,7 +51,6 @@ def init_db():
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_medicamento ON precios(medicamento)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_fecha ON precios(fecha)')
     
-    # Tabla de rangos esperados por medicamento
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS rangos_precios (
             medicamento_generico TEXT PRIMARY KEY,
@@ -60,12 +58,10 @@ def init_db():
             precio_max REAL
         )
     ''')
-    # Insertar rangos por defecto (ejemplo)
     rangos_default = [
-        ('ibuprofeno', 50, 300),
-        ('paracetamol', 30, 200),
-        ('aspirina', 40, 250),
-        # Agrega más según tus datos
+        ('ibuprofeno', 5, 1000),
+        ('paracetamol', 5, 800),
+        ('aspirina', 5, 800),
     ]
     if IS_PROD:
         cursor.executemany(
@@ -78,7 +74,6 @@ def init_db():
             'INSERT OR IGNORE INTO rangos_precios (medicamento_generico, precio_min, precio_max) VALUES (?, ?, ?)',
             rangos_default
         )
-    
     conn.commit()
     conn.close()
 
@@ -88,18 +83,32 @@ def normalizar_texto(texto: str) -> str:
     texto = re.sub(r'\s+', ' ', texto)
     return texto
 
-# ============================================================
-# VALIDACIONES (Fixes 1 y 3)
-# ============================================================
+def normalizar_farmacia(nombre: str) -> str:
+    """Normaliza el nombre de la farmacia para deduplicación (case-insensitive)."""
+    if not nombre:
+        return ""
+    # Extraer lo que está entre paréntesis (ej: "Rappi (Farmacias Guadalajara)")
+    match = re.search(r'\(([^)]+)\)', nombre)
+    if match:
+        nombre = match.group(1)
+    # Limpiar y normalizar
+    nombre = nombre.lower().strip()
+    # Eliminar palabras comunes para agrupar mejor
+    nombre = re.sub(r'\bfarmacias?\b', '', nombre)
+    nombre = re.sub(r'\s+', ' ', nombre).strip()
+    return nombre
+
 def validar_coherencia_producto(nombre_raw: str, medicamento_buscado: str) -> bool:
-    """Fix 1: Compara nombre_raw con el medicamento normalizado."""
     if not nombre_raw:
         return False
-    sim = SequenceMatcher(None, nombre_raw.lower(), medicamento_buscado.lower()).ratio()
+    nombre_raw_lower = nombre_raw.lower()
+    medicamento_buscado_lower = medicamento_buscado.lower()
+    if medicamento_buscado_lower in nombre_raw_lower:
+        return True
+    sim = SequenceMatcher(None, nombre_raw_lower, medicamento_buscado_lower).ratio()
     return sim >= UMBRAL_SIMILITUD
 
 def validar_precio(precio: float, medicamento_generico: str, conn) -> bool:
-    """Fix 3: Verifica que el precio esté dentro del rango esperado."""
     if precio <= 0:
         return False
     cursor = conn.cursor()
@@ -129,16 +138,12 @@ def validar_precio(precio: float, medicamento_generico: str, conn) -> bool:
             logging.warning(f"Precio fuera de rango para {medicamento_generico}: ${precio} (rango esperado: {limite_inf} - {limite_sup})")
             return False
     else:
-        # Sin rango definido: aplicar límite absoluto
         if precio <= PRECIO_MAXIMO_ABSOLUTO:
             return True
         else:
             logging.warning(f"Precio excede límite absoluto para {medicamento_generico}: ${precio}")
             return False
 
-# ============================================================
-# GUARDAR PRECIO
-# ============================================================
 def save_precio(data: Dict[str, Any]):
     required = ['medicamento', 'farmacia', 'precio', 'fuente', 'fecha']
     for field in required:
@@ -197,11 +202,9 @@ def save_precio(data: Dict[str, Any]):
     conn.commit()
     conn.close()
 
-# ============================================================
-# BÚSQUEDA PRINCIPAL (con deduplicación y validaciones)
-# ============================================================
 def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     medicamento_norm = normalizar_texto(medicamento)
+    logging.info(f"🔍 Buscando: {medicamento_norm}")
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -221,53 +224,36 @@ def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
         ''', (f'%{medicamento_norm}%', fecha_limite))
     
     rows = cursor.fetchall()
+    resultados = [dict(row) for row in rows]
+    logging.info(f"📦 Registros obtenidos de BD: {len(resultados)}")
     
-    # Convertir a lista de diccionarios
-    resultados = []
-    for row in rows:
-        if IS_PROD:
-            resultados.append(dict(row))
-        else:
-            resultados.append(dict(row))
-    
-    # ------------------------------
-    # Fix 2: Deduplicación por farmacia (mantener el más reciente)
-    # ------------------------------
-    mejores_por_farmacia = {}
+    filtrados_coherencia = []
     for r in resultados:
-        farmacia = r['farmacia']
-        fecha = r['fecha']
-        if farmacia not in mejores_por_farmacia or fecha > mejores_por_farmacia[farmacia]['fecha']:
-            mejores_por_farmacia[farmacia] = r
-    
-    deduplicados = list(mejores_por_farmacia.values())
-    
-    # ------------------------------
-    # Fix 1 y 3: Validar coherencia de nombre y precio
-    # ------------------------------
-    validados = []
-    for r in deduplicados:
-        # Fix 1: validar nombre_raw vs medicamento buscado
         nombre_raw = r.get('nombre_raw', '')
-        if not validar_coherencia_producto(nombre_raw, medicamento_norm):
-            logging.info(f"Descartado por incoherencia de nombre: {nombre_raw} vs {medicamento_norm}")
-            continue  # descartar completamente
-        
-        # Fix 3: validar precio
-        precio = r['precio']
-        if not validar_precio(precio, medicamento_norm, conn):
-            logging.info(f"Descartado por precio anómalo: {precio} para {medicamento_norm}")
-            continue
-        
-        # Si pasa ambas, se agrega
-        validados.append(r)
+        if validar_coherencia_producto(nombre_raw, medicamento_norm):
+            filtrados_coherencia.append(r)
+        else:
+            logging.info(f"  ❌ Descartado por coherencia: {nombre_raw[:40]}... | vs {medicamento_norm}")
+    
+    filtrados_precio = []
+    for r in filtrados_coherencia:
+        if validar_precio(r['precio'], medicamento_norm, conn):
+            filtrados_precio.append(r)
+        else:
+            logging.info(f"  ❌ Descartado por precio: ${r['precio']} - {r.get('nombre_raw', '')[:30]}")
+    
+    mejores = {}
+    for r in filtrados_precio:
+        farmacia_norm = normalizar_farmacia(r['farmacia'])
+        # Comparar fechas como strings (ISO) funciona si están en el mismo formato
+        if farmacia_norm not in mejores or r['fecha'] > mejores[farmacia_norm]['fecha']:
+            mejores[farmacia_norm] = r
     
     conn.close()
-    return validados
+    final = list(mejores.values())
+    logging.info(f"✅ Resultados finales después de deduplicar: {len(final)}")
+    return final
 
-# ============================================================
-# RESUMEN Y HISTÓRICO (sin cambios, pero usan get_precios)
-# ============================================================
 def get_resumen(medicamento: str) -> List[Dict[str, Any]]:
     return get_precios(medicamento, horas=24)
 
@@ -293,11 +279,7 @@ def get_last_precios(medicamento: str, limit: int = 5) -> List[Dict[str, Any]]:
     
     rows = cursor.fetchall()
     conn.close()
-    
-    if IS_PROD:
-        return [dict(row) for row in rows]
-    else:
-        return [dict(row) for row in rows]
+    return [dict(row) for row in rows]
 
 def count_precios() -> int:
     conn = get_connection()
@@ -307,21 +289,15 @@ def count_precios() -> int:
     conn.close()
     return count
 
-# ============================================================
-# CONTAR POR FUENTE (Fix 4: ya existe, solo aseguramos)
-# ============================================================
 def contar_por_fuente():
     conn = get_connection()
     cursor = conn.cursor()
-    
     if IS_PROD:
         cursor.execute("SELECT fuente, COUNT(*) FROM precios GROUP BY fuente")
     else:
         cursor.execute("SELECT fuente, COUNT(*) FROM precios GROUP BY fuente")
-    
     rows = cursor.fetchall()
     conn.close()
-    
     resultado = {}
     for row in rows:
         if IS_PROD:
@@ -331,5 +307,4 @@ def contar_por_fuente():
             fuente = row[0]
             count = row[1]
         resultado[fuente] = count
-    
     return resultado

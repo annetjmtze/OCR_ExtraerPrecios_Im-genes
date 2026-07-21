@@ -9,7 +9,11 @@ from twilio.twiml.messaging_response import MessagingResponse
 from dotenv import load_dotenv
 
 from llm.normalizer import MedicamentoNormalizer
-from data.database import get_resumen, init_db, save_precio, get_last_precios
+from data.database import (
+    get_resumen, init_db, save_precio, get_last_precios,
+    validar_coherencia_producto, validar_precio, normalizar_farmacia,
+    get_connection, get_precios
+)
 from bot.counter import increment_and_check_limit, is_limit_reached, LIMITE_DIARIO, LIMITE_NOTIFICACION
 from bot.telegram_notifier import send_telegram_message
 
@@ -18,7 +22,7 @@ load_dotenv()
 # --------------------------------------------
 #  INICIALIZAR BASE DE DATOS
 # --------------------------------------------
-init_db()  # Crea la tabla si no existe
+init_db()
 
 # --------------------------------------------
 #  APLICACIÓN FLASK
@@ -26,18 +30,16 @@ init_db()  # Crea la tabla si no existe
 app = Flask(__name__)
 normalizer = MedicamentoNormalizer()
 
+# Configurar logging para ver detalles
+logging.basicConfig(level=logging.INFO)
+
 def formatear_respuesta(nombre_generico: str, farmacias: list, delivery: list) -> str:
-    """
-    Construye el mensaje en el formato exacto requerido para la Semana 3.
-    """
     lines = []
     lines.append(f"💊 *{nombre_generico.title()}*")
     lines.append("")
 
-    # ---- 1. FARMACIAS FÍSICAS ----
     if farmacias:
         lines.append("📍 *Farmacias cercanas:*")
-        # Limitar a 10 para no saturar
         for i, p in enumerate(farmacias[:10], 1):
             precio = p['precio']
             farmacia = p['farmacia']
@@ -51,12 +53,9 @@ def formatear_respuesta(nombre_generico: str, farmacias: list, delivery: list) -
     else:
         lines.append("📍 No hay farmacias físicas con precios recientes.\n")
 
-    # ---- 2. DELIVERY ----
     if delivery:
         lines.append("🛵 *También disponible a domicilio:*")
-        # Limitar a 3 para no saturar
         for p in delivery[:3]:
-            # Determinar plataforma
             fuente = p['fuente'].lower()
             if 'rappi' in fuente:
                 plataforma = "Rappi"
@@ -65,7 +64,6 @@ def formatear_respuesta(nombre_generico: str, farmacias: list, delivery: list) -
             else:
                 plataforma = "Delivery"
 
-            # Link: priorizar el de la BD, si no, generar búsqueda
             url = p.get('url') or p.get('link_producto')
             if not url:
                 busqueda = nombre_generico.replace(' ', '+')
@@ -76,22 +74,17 @@ def formatear_respuesta(nombre_generico: str, farmacias: list, delivery: list) -
                 else:
                     url = "#"
 
-            # Tiempo de entrega (si no existe, usar default)
             entrega = p.get('entrega_estimada', '25-35 min')
-
             linea = f"• {plataforma} ({p['farmacia']}) — ${p['precio']:.2f}"
             linea += f"\n  ⏱️ {entrega} · 🔗 Pedir aquí: {url}"
             lines.append(linea)
         lines.append("")
 
-    # ---- 3. PIE DE PÁGINA: actualización ----
     if farmacias or delivery:
-        # Tomar la fecha más reciente de todos los precios
         todos = farmacias + delivery
         fechas = [p.get('fecha') for p in todos if p.get('fecha')]
         if fechas:
             try:
-                # Tomar la fecha más reciente
                 ultima = max(fechas)
                 if isinstance(ultima, str):
                     ultima = datetime.fromisoformat(ultima.replace('Z', '+00:00'))
@@ -123,18 +116,15 @@ def whatsapp_webhook():
         sender = request.form.get("From", "desconocido")
         logging.info(f"Mensaje de {sender}: {incoming_msg}")
 
-        # ---------- VERIFICAR LÍMITE DIARIO ----------
         if is_limit_reached():
             msg.body("Alcanzamos el límite de consultas por hoy. Vuelve mañana.")
             logging.warning(f"Límite diario alcanzado, rechazando mensaje de {sender}")
             return Response(str(resp), mimetype="application/xml")
-        # --------------------------------------------
 
         if not incoming_msg:
             msg.body("Por favor, envía el nombre de un medicamento.")
             return Response(str(resp), mimetype="application/xml")
 
-        # Normalizar (usando Claude)
         resultado = normalizer.normalizar(incoming_msg)
         if "error" in resultado:
             msg.body(f"❌ Error: {resultado['error']}")
@@ -142,52 +132,73 @@ def whatsapp_webhook():
 
         nombre_generico = resultado.get('nombre_generico', '').lower()
         nombre_ingresado = resultado.get('nombre_ingresado', incoming_msg).lower()
+        medicamento_ref = nombre_generico if nombre_generico else nombre_ingresado
 
-        # ---- 1. BUSCAR PRECIOS RECIENTES (últimas 24h) ----
+        # ---- OBTENER PRECIOS RECIENTES (últimas 24h) ----
         precios_recientes = get_resumen(nombre_generico) + get_resumen(nombre_ingresado)
+        logging.info(f"Registros recientes obtenidos: {len(precios_recientes)}")
 
-        # ---- 2. BUSCAR HISTÓRICOS (sin límite de tiempo) para delivery ----
-        # Si no hay delivery reciente, buscar delivery histórico
-        historicos = []
-        if not any(p.get('fuente', '').lower() in ['agente_rappi', 'agente_ubereats'] for p in precios_recientes):
-            # Buscar delivery histórico (últimos 3)
-            hist_delivery = get_last_precios(nombre_generico, limit=10)
-            hist_delivery += get_last_precios(nombre_ingresado, limit=10)
-            # Filtrar solo delivery
-            historicos = [p for p in hist_delivery if p.get('fuente', '').lower() in ['agente_rappi', 'agente_ubereats']]
-            # Eliminar duplicados
+        # ---- SI NO HAY RECIENTES, BUSCAR HISTÓRICOS (sin límite de tiempo) ----
+        if not precios_recientes:
+            logging.info("No hay registros recientes, buscando históricos...")
+            historicos_todos = get_last_precios(nombre_generico, limit=20) + get_last_precios(nombre_ingresado, limit=20)
+            # Eliminar duplicados por combinación de campos
             seen = set()
-            unique_historicos = []
-            for p in historicos:
-                key = (p.get('farmacia'), p.get('precio'), p.get('url'))
+            precios_recientes = []
+            for p in historicos_todos:
+                key = (p.get('farmacia'), p.get('precio'), p.get('nombre_raw'))
                 if key not in seen:
                     seen.add(key)
-                    unique_historicos.append(p)
-            historicos = unique_historicos[:5]  # Limitar a 5
+                    precios_recientes.append(p)
+            logging.info(f"Registros históricos obtenidos: {len(precios_recientes)}")
 
-        # ---- 3. COMBINAR RECIENTES + HISTÓRICOS (para delivery) ----
-        # Mantener precios_recientes para farmacias físicas
-        # Para delivery: usar recientes + históricos (si no hay recientes)
-        delivery_recientes = [p for p in precios_recientes if p.get('fuente', '').lower() in ['agente_rappi', 'agente_ubereats']]
-        if not delivery_recientes:
-            # Usar históricos de delivery
-            delivery = historicos
-        else:
-            delivery = delivery_recientes
+        # ---- APLICAR FILTROS DE COHERENCIA, PRECIO Y DEDUPLICACIÓN ----
+        conn = get_connection()
+        try:
+            # Filtro coherencia
+            filtrados_coherencia = []
+            for p in precios_recientes:
+                if validar_coherencia_producto(p.get('nombre_raw', ''), medicamento_ref):
+                    filtrados_coherencia.append(p)
+                else:
+                    logging.info(f"Descartado por incoherencia: {p.get('nombre_raw', '')[:40]} vs {medicamento_ref}")
 
-        # Farmacias físicas: solo recientes
-        farmacias = [p for p in precios_recientes if p.get('fuente', '').lower() not in ['agente_rappi', 'agente_ubereats']]
+            logging.info(f"Después de filtro de coherencia: {len(filtrados_coherencia)}")
 
-        # ---- 4. ORDENAR ----
+            # Filtro precio
+            filtrados_precio = []
+            for p in filtrados_coherencia:
+                if validar_precio(p['precio'], medicamento_ref, conn):
+                    filtrados_precio.append(p)
+                else:
+                    logging.info(f"Descartado por precio anómalo: ${p['precio']} para {medicamento_ref}")
+
+            logging.info(f"Después de filtro de precio: {len(filtrados_precio)}")
+
+            # Deduplicación por farmacia (mantener el más reciente)
+            mejores = {}
+            for p in filtrados_precio:
+                farmacia_norm = normalizar_farmacia(p['farmacia'])
+                if farmacia_norm not in mejores or p['fecha'] > mejores[farmacia_norm]['fecha']:
+                    mejores[farmacia_norm] = p
+            precios_depurados = list(mejores.values())
+            logging.info(f"Después de deduplicación: {len(precios_depurados)}")
+        finally:
+            conn.close()
+
+        # ---- SEPARAR FÍSICAS Y DELIVERY ----
+        delivery = [p for p in precios_depurados if p.get('fuente', '').lower() in ['agente_rappi', 'agente_ubereats']]
+        farmacias = [p for p in precios_depurados if p.get('fuente', '').lower() not in ['agente_rappi', 'agente_ubereats']]
+
+        # Ordenar
         farmacias.sort(key=lambda x: x['precio'])
         delivery.sort(key=lambda x: x['precio'])
 
-        # ---- 5. SI HAY PRECIOS (físicas o delivery) ----
         if farmacias or delivery:
             respuesta = formatear_respuesta(nombre_generico, farmacias, delivery)
             msg.body(respuesta)
         else:
-            # ---- SIN PRECIOS: FALLBACK ----
+            # Si no hay precios después de los filtros, mostrar la ficha de información
             ficha = f"📋 *Ficha de {nombre_ingresado.title()}*\n\n"
             ficha += f"*Nombre genérico:* {resultado.get('nombre_generico', 'No disponible')}\n"
             ficha += f"*Uso principal:* {resultado.get('uso_principal', 'No disponible')}\n"
@@ -196,7 +207,6 @@ def whatsapp_webhook():
             ficha += "\n⚠️ Aún no tenemos precios para este medicamento. Estamos actualizando nuestra base de datos — intenta de nuevo mañana o busca otro medicamento."
             msg.body(ficha)
 
-        # --- NOTIFICACIÓN TELEGRAM (80%) ---
         if increment_and_check_limit():
             mensaje = (
                 f"⚠️ *Dr. Ahorro* — Límite diario al 80%\n"
@@ -214,15 +224,9 @@ def whatsapp_webhook():
 
     return Response(str(resp), mimetype="application/xml")
 
-# --------------------------------------------
-#  FUNCIÓN PARA main.py
-# --------------------------------------------
 def run_whatsapp_bot(port=5000):
     app.run(host="0.0.0.0", port=port, debug=False)
 
-# --------------------------------------------
-#  EJECUCIÓN DIRECTA
-# --------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
