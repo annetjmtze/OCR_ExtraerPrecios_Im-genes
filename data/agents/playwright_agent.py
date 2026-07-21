@@ -1,10 +1,6 @@
-import os
-# ── FORZAR USO DE CHROME REAL (consistente con Rappi/Uber) ──
-os.environ['PLAYWRIGHT_BROWSERS_PATH'] = '/usr/bin'
-os.environ['CHROME_PATH'] = '/usr/bin/google-chrome-stable'
-
 import asyncio
 import base64
+import os
 import sys
 import json
 import random
@@ -89,6 +85,7 @@ FARMACIAS = [
         "result_container": ".product",
         "fallback_url": None,
     },
+    # ── NUEVAS FARMACIAS ────────────────────────────────
     {
         "nombre": "Farmacias Similares",
         "url": "https://www.farmaciasdesimilares.com/",
@@ -100,9 +97,9 @@ FARMACIAS = [
         "result_container": ".product",
         "fallback_url": "https://www.farmaciasdesimilares.com/paracetamol-500-mg",
     },
-    {
+        {
         "nombre": "Farmacias San Pablo",
-        "url": "https://www.farmaciasanpablo.com.mx/",
+        "url": "https://www.farmaciasanpablo.com.mx/",   # página principal (puede bloquear)
         "price_selectors": [
             ".price-box .price",
             ".product-price",
@@ -110,6 +107,7 @@ FARMACIAS = [
             ".regular-price",
         ],
         "result_container": None,
+        # Sustituye por una URL de producto que muestre precio (ej. paracetamol)
         "fallback_url": "https://www.farmaciasanpablo.com.mx/medicamentos/genericos/m---n---o---p/paracetamol-500-0-mg/p/000000000070007368",
     },
     {
@@ -205,23 +203,19 @@ def extraer_precio_regex(texto: str) -> Optional[float]:
         r'\$\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2}))',
         r'\$\s*(\d+(?:\.\d{2})?)',
         r'(\d+\.\d{2})\s*\$',
-        r'(\d+\.\d{2})',
     ]
     for patron in patrones:
         match = re.search(patron, texto)
         if match:
             precio_str = match.group(1).replace(',', '')
-            try:
-                return float(precio_str)
-            except ValueError:
-                continue
+            return float(precio_str)
     return None
 
 async def extraer_precio_directo(page, selectors: list) -> Optional[float]:
     """Intenta extraer el precio directamente del DOM usando selectores CSS."""
     for selector in selectors:
         try:
-            element = await page.wait_for_selector(selector, timeout=3000)
+            element = await page.wait_for_selector(selector, timeout=5000)
             if element:
                 texto = await element.inner_text()
                 limpio = re.sub(r'[^\d.]', '', texto)
@@ -233,19 +227,18 @@ async def extraer_precio_directo(page, selectors: list) -> Optional[float]:
 
 def extraer_precio_desde_html(html: str) -> Optional[float]:
     """Busca precios en JSON-LD o meta tags del HTML."""
-    patrones = [
-        r'"price"\s*:\s*"?([\d.]+)"?',
-        r'property="product:price:amount"\s*content="([\d.]+)"',
-        r'data-price-amount="([\d.]+)"',
-        r'itemprop="price"\s*content="([\d.]+)"',
-    ]
-    for patron in patrones:
-        match = re.search(patron, html)
-        if match:
-            try:
-                return float(match.group(1))
-            except ValueError:
-                continue
+    # Patrón JSON-LD: "price": "23.00" o "price":23.00
+    match = re.search(r'"price"\s*:\s*"?([\d.]+)"?', html)
+    if match:
+        return float(match.group(1))
+    # Patrón meta property="product:price:amount" content="23.00"
+    match = re.search(r'property="product:price:amount"\s*content="([\d.]+)"', html)
+    if match:
+        return float(match.group(1))
+    # Patrón genérico: data-price-amount="23.00"
+    match = re.search(r'data-price-amount="([\d.]+)"', html)
+    if match:
+        return float(match.group(1))
     return None
 
 async def extraer_datos(page, image_bytes: bytes, farmacia_nombre: str, price_selectors: list) -> Dict[str, Any]:
@@ -261,7 +254,7 @@ async def extraer_datos(page, image_bytes: bytes, farmacia_nombre: str, price_se
         base64_image = base64.b64encode(image_bytes).decode("utf-8")
         try:
             response = claude.messages.create(
-                model="claude-haiku-4-5",  # Modelo actualizado
+                model="claude-haiku-4-5",
                 max_tokens=1024,
                 messages=[
                     {
@@ -289,9 +282,8 @@ async def extraer_datos(page, image_bytes: bytes, farmacia_nombre: str, price_se
                     precio = float(precio_claude.replace(",", "").strip())
                 else:
                     precio = float(precio_claude)
-                logger.info(f"   Precio extraído por Claude: ${precio}")
         except Exception as e:
-            logger.error(f"Error en Claude: {e}")
+            logger.error(f"Error Claude: {e}")
 
     if not precio:
         # Regex sobre texto visible
@@ -301,7 +293,7 @@ async def extraer_datos(page, image_bytes: bytes, farmacia_nombre: str, price_se
             if precio:
                 logger.info(f"   Regex encontró precio: ${precio}")
         except Exception as e:
-            logger.warning(f"Error en regex: {e}")
+            logger.warning(f"Error regex: {e}")
 
     if not precio:
         # HTML crudo (última oportunidad)
@@ -331,7 +323,7 @@ async def guardar_en_db(datos: dict, fuente: str, imagen_url: str):
             "nombre_raw": datos.get("medicamento"),
             "farmacia": datos.get("farmacia"),
             "precio": precio,
-            "url": None,  # Este agente no extrae URLs de producto
+            "url": None,
             "imagen_url": imagen_url,
             "fuente": fuente,
             "fecha": datetime.now(timezone.utc).isoformat(),
@@ -349,12 +341,7 @@ async def capturar_precio(farmacia: dict, medicamento: str, headless: bool = Tru
     logger.info(f"⏳ Procesando {nombre}...")
 
     async with async_playwright() as p:
-        # ── USAR GOOGLE CHROME (channel="chrome") ──
-        browser = await p.chromium.launch(
-            channel="chrome",
-            headless=headless,
-            args=["--disable-blink-features=AutomationControlled"]
-        )
+        browser = await p.chromium.launch(headless=headless)
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
         )
@@ -377,13 +364,13 @@ async def capturar_precio(farmacia: dict, medicamento: str, headless: bool = Tru
                         break
                     except Exception:
                         continue
-                await asyncio.sleep(random.uniform(1, 2))
+                await asyncio.sleep(1)
             else:
                 logger.info("   Usando URL de producto de respaldo...")
                 if farmacia.get("fallback_url"):
                     await page.goto(farmacia["fallback_url"], timeout=30000)
                     await page.wait_for_load_state('networkidle', timeout=10000)
-                    await asyncio.sleep(random.uniform(2, 3))
+                    await asyncio.sleep(2)
                 else:
                     logger.error(f"No hay URL de respaldo para {nombre}. Omitiendo.")
                     await browser.close()
@@ -407,11 +394,7 @@ async def capturar_precio(farmacia: dict, medicamento: str, headless: bool = Tru
             return datos
 
         except Exception as e:
-            logger.error(f"❌ Error en {nombre}: {e}", exc_info=True)
-            try:
-                await page.screenshot(path=f"error_{nombre.lower().replace(' ', '_')}.png")
-            except:
-                pass
+            logger.error(f"❌ Error en {nombre}: {e}")
             await browser.close()
             return None
 
