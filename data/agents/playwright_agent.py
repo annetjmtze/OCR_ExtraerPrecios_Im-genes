@@ -1,11 +1,7 @@
 import os
-# ── FORZAR USO DE CHROME REAL (consistente con Rappi/Uber) ──
-os.environ['PLAYWRIGHT_BROWSERS_PATH'] = '/usr/bin'
-os.environ['CHROME_PATH'] = '/usr/bin/google-chrome-stable'
-
+import sys
 import asyncio
 import base64
-import sys
 import json
 import random
 import re
@@ -13,7 +9,20 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any
+from urllib.parse import urlparse
 
+# ── Configurar logging a stdout ──
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    stream=sys.stdout
+)
+logger = logging.getLogger("playwright_agent")
+
+# ── Ruta a Google Chrome (si está instalado) ──
+CHROME_PATH = "/usr/bin/google-chrome-stable"
+
+# ── Importar dependencias ──
 from playwright.async_api import async_playwright
 import anthropic
 from dotenv import load_dotenv
@@ -44,10 +53,7 @@ if USE_R2:
     )
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("playwright_agent")
+claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
 
 EXTRACTION_PROMPT = """
 Eres un asistente que extrae información de capturas de pantalla de farmacias online.
@@ -218,7 +224,6 @@ def extraer_precio_regex(texto: str) -> Optional[float]:
     return None
 
 async def extraer_precio_directo(page, selectors: list) -> Optional[float]:
-    """Intenta extraer el precio directamente del DOM usando selectores CSS."""
     for selector in selectors:
         try:
             element = await page.wait_for_selector(selector, timeout=3000)
@@ -232,7 +237,6 @@ async def extraer_precio_directo(page, selectors: list) -> Optional[float]:
     return None
 
 def extraer_precio_desde_html(html: str) -> Optional[float]:
-    """Busca precios en JSON-LD o meta tags del HTML."""
     patrones = [
         r'"price"\s*:\s*"?([\d.]+)"?',
         r'property="product:price:amount"\s*content="([\d.]+)"',
@@ -249,52 +253,51 @@ def extraer_precio_desde_html(html: str) -> Optional[float]:
     return None
 
 async def extraer_datos(page, image_bytes: bytes, farmacia_nombre: str, price_selectors: list) -> Dict[str, Any]:
-    """
-    Híbrido: 1. Selectores CSS  2. Claude Vision  3. Regex  4. HTML crudo
-    """
     datos = {}
     precio = await extraer_precio_directo(page, price_selectors)
     if precio:
         logger.info(f"   Precio extraído directamente del DOM: ${precio}")
     else:
-        # Claude Vision
-        base64_image = base64.b64encode(image_bytes).decode("utf-8")
-        try:
-            response = claude.messages.create(
-                model="claude-haiku-4-5",  # Modelo actualizado
-                max_tokens=1024,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "image",
-                                "source": {
-                                    "type": "base64",
-                                    "media_type": "image/png",
-                                    "data": base64_image,
+        # Claude Vision (solo si hay API key)
+        if claude:
+            base64_image = base64.b64encode(image_bytes).decode("utf-8")
+            try:
+                response = claude.messages.create(
+                    model="claude-haiku-4-5",
+                    max_tokens=1024,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "image",
+                                    "source": {
+                                        "type": "base64",
+                                        "media_type": "image/png",
+                                        "data": base64_image,
+                                    },
                                 },
-                            },
-                            {"type": "text", "text": EXTRACTION_PROMPT},
-                        ],
-                    }
-                ],
-            )
-            texto = response.content[0].text
-            texto = texto.strip("`").replace("json\n", "").replace("\n`", "")
-            datos = json.loads(texto)
-            precio_claude = datos.get("precio")
-            if precio_claude and precio_claude != "null":
-                if isinstance(precio_claude, str):
-                    precio = float(precio_claude.replace(",", "").strip())
-                else:
-                    precio = float(precio_claude)
-                logger.info(f"   Precio extraído por Claude: ${precio}")
-        except Exception as e:
-            logger.error(f"Error en Claude: {e}")
+                                {"type": "text", "text": EXTRACTION_PROMPT},
+                            ],
+                        }
+                    ],
+                )
+                texto = response.content[0].text
+                texto = texto.strip("`").replace("json\n", "").replace("\n`", "")
+                datos = json.loads(texto)
+                precio_claude = datos.get("precio")
+                if precio_claude and precio_claude != "null":
+                    if isinstance(precio_claude, str):
+                        precio = float(precio_claude.replace(",", "").strip())
+                    else:
+                        precio = float(precio_claude)
+                    logger.info(f"   Precio extraído por Claude: ${precio}")
+            except Exception as e:
+                logger.warning(f"Error en Claude: {e}")
+        else:
+            logger.warning("   Claude API key no configurada. Saltando visión.")
 
     if not precio:
-        # Regex sobre texto visible
         try:
             texto_pagina = await page.inner_text("body")
             precio = extraer_precio_regex(texto_pagina)
@@ -304,7 +307,6 @@ async def extraer_datos(page, image_bytes: bytes, farmacia_nombre: str, price_se
             logger.warning(f"Error en regex: {e}")
 
     if not precio:
-        # HTML crudo (última oportunidad)
         logger.info("   Intentando extraer precio desde HTML crudo (JSON-LD)...")
         html = await page.content()
         precio = extraer_precio_desde_html(html)
@@ -331,7 +333,7 @@ async def guardar_en_db(datos: dict, fuente: str, imagen_url: str):
             "nombre_raw": datos.get("medicamento"),
             "farmacia": datos.get("farmacia"),
             "precio": precio,
-            "url": None,  # Este agente no extrae URLs de producto
+            "url": None,
             "imagen_url": imagen_url,
             "fuente": fuente,
             "fecha": datetime.now(timezone.utc).isoformat(),
@@ -349,21 +351,33 @@ async def capturar_precio(farmacia: dict, medicamento: str, headless: bool = Tru
     logger.info(f"⏳ Procesando {nombre}...")
 
     async with async_playwright() as p:
-        # ── USAR GOOGLE CHROME (channel="chrome") ──
-        browser = await p.chromium.launch(
-            channel="chrome",
-            headless=headless,
-            args=["--disable-blink-features=AutomationControlled"]
-        )
+        # ── Usar Chrome con executable_path (si existe) ──
+        launch_options = {
+            "headless": headless,
+            "args": ["--disable-blink-features=AutomationControlled"]
+        }
+        # Intentar usar Google Chrome si está instalado
+        if os.path.exists(CHROME_PATH):
+            launch_options["executable_path"] = CHROME_PATH
+            logger.info(f"   Usando Google Chrome desde {CHROME_PATH}")
+        else:
+            logger.warning(f"   Google Chrome no encontrado en {CHROME_PATH}, usando Chromium por defecto.")
+            # Si no está, usamos channel="chrome" como fallback (puede funcionar si Chrome está en otro lugar)
+            # Pero mejor usar playwright por defecto (sin channel) que es Chromium
+            # No especificamos channel para que use Chromium integrado.
+
+        browser = await p.chromium.launch(**launch_options)
+
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
         )
         page = await context.new_page()
 
         try:
-            # Navegar a la página principal
+            # ── Navegar a la página principal ──
             await page.goto(farmacia["url"], timeout=30000)
-            await page.wait_for_load_state('networkidle', timeout=10000)
+            # Cambiar de networkidle a domcontentloaded para evitar timeouts
+            await page.wait_for_load_state('domcontentloaded', timeout=15000)
             await asyncio.sleep(random.uniform(2, 4))
 
             search_input = await find_search_input(page)
@@ -382,7 +396,7 @@ async def capturar_precio(farmacia: dict, medicamento: str, headless: bool = Tru
                 logger.info("   Usando URL de producto de respaldo...")
                 if farmacia.get("fallback_url"):
                     await page.goto(farmacia["fallback_url"], timeout=30000)
-                    await page.wait_for_load_state('networkidle', timeout=10000)
+                    await page.wait_for_load_state('domcontentloaded', timeout=15000)
                     await asyncio.sleep(random.uniform(2, 3))
                 else:
                     logger.error(f"No hay URL de respaldo para {nombre}. Omitiendo.")

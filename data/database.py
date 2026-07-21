@@ -1,4 +1,5 @@
 import os
+import sys
 import sqlite3
 import psycopg
 from psycopg.rows import dict_row
@@ -8,10 +9,20 @@ import re
 import unicodedata
 import logging
 from difflib import SequenceMatcher
-from urllib.parse import urlparse  # 👈 NUEVA IMPORTACIÓN
+from urllib.parse import urlparse
 
 # ============================================================
-# CONFIGURACIÓN
+# CONFIGURACIÓN DE LOGGING (FORZAR SALIDA A STDOUT)
+# ============================================================
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stdout
+)
+logger = logging.getLogger(__name__)
+
+# ============================================================
+# CONFIGURACIÓN DE BASE DE DATOS
 # ============================================================
 DATABASE_URL = os.getenv("DATABASE_URL")
 IS_PROD = DATABASE_URL is not None
@@ -19,8 +30,6 @@ DB_PATH = "data/precios.db"
 
 PRECIO_MAXIMO_ABSOLUTO = 2000.0
 UMBRAL_SIMILITUD = 0.3
-
-logging.basicConfig(level=logging.INFO)
 
 def get_connection():
     if IS_PROD:
@@ -63,6 +72,10 @@ def init_db():
         ('ibuprofeno', 5, 1000),
         ('paracetamol', 5, 800),
         ('aspirina', 5, 800),
+        ('omeprazol', 5, 600),
+        ('naproxeno', 5, 800),
+        ('metformina', 5, 500),
+        ('losartan', 5, 500),
     ]
     if IS_PROD:
         cursor.executemany(
@@ -91,13 +104,10 @@ def normalizar_farmacia(nombre: str) -> str:
     """
     if not nombre:
         return ""
-    # Extraer lo que está entre paréntesis (ej: "Rappi (Farmacias Guadalajara)")
     match = re.search(r'\(([^)]+)\)', nombre)
     if match:
         nombre = match.group(1)
-    # Limpiar y normalizar
     nombre = nombre.lower().strip()
-    # Eliminar palabras comunes para agrupar mejor
     nombre = re.sub(r'\bfarmacias?\b', '', nombre)
     nombre = re.sub(r'\s+', ' ', nombre).strip()
     return nombre
@@ -139,20 +149,19 @@ def validar_precio(precio: float, medicamento_generico: str, conn) -> bool:
         if limite_inf <= precio <= limite_sup:
             return True
         else:
-            logging.warning(f"Precio fuera de rango para {medicamento_generico}: ${precio} (rango esperado: {limite_inf} - {limite_sup})")
+            logger.warning(f"Precio fuera de rango para {medicamento_generico}: ${precio} (rango esperado: {limite_inf} - {limite_sup})")
             return False
     else:
         if precio <= PRECIO_MAXIMO_ABSOLUTO:
             return True
         else:
-            logging.warning(f"Precio excede límite absoluto para {medicamento_generico}: ${precio}")
+            logger.warning(f"Precio excede límite absoluto para {medicamento_generico}: ${precio}")
             return False
 
 # ============================================================
-# VALIDACIÓN DE URL (NUEVO)
+# VALIDACIÓN DE URL
 # ============================================================
 def es_url_valida(url: str) -> bool:
-    """Verifica si la URL es válida (tiene esquema http/https y netloc)."""
     if not url:
         return False
     try:
@@ -167,11 +176,10 @@ def save_precio(data: Dict[str, Any]):
         if field not in data or data[field] is None:
             raise ValueError(f"Campo '{field}' obligatorio")
     
-    # ---- VALIDAR URL (NUEVO) ----
     url = data.get('url')
     if url and not es_url_valida(url):
-        logging.warning(f"URL inválida detectada: {url} — se guardará como NULL")
-        data['url'] = None  # o '' según prefieras
+        logger.warning(f"URL inválida detectada: {url} — se guardará como NULL")
+        data['url'] = None
     
     fecha_str = data['fecha']
     if not IS_PROD:
@@ -197,7 +205,7 @@ def save_precio(data: Dict[str, Any]):
             data['precio'],
             data.get('precio_promo'),
             data.get('vigencia'),
-            data.get('url'),  # Ya validado
+            data.get('url'),
             data.get('imagen_url'),
             data['fuente'],
             fecha_str
@@ -216,7 +224,7 @@ def save_precio(data: Dict[str, Any]):
             data['precio'],
             data.get('precio_promo'),
             data.get('vigencia'),
-            data.get('url'),  # Ya validado
+            data.get('url'),
             data.get('imagen_url'),
             data['fuente'],
             fecha_str
@@ -227,7 +235,7 @@ def save_precio(data: Dict[str, Any]):
 
 def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     medicamento_norm = normalizar_texto(medicamento)
-    logging.info(f"🔍 Buscando: {medicamento_norm}")
+    logger.info(f"🔍 Buscando: {medicamento_norm}")
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -248,7 +256,7 @@ def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     
     rows = cursor.fetchall()
     resultados = [dict(row) for row in rows]
-    logging.info(f"📦 Registros obtenidos de BD: {len(resultados)}")
+    logger.info(f"📦 Registros obtenidos de BD: {len(resultados)}")
     
     filtrados_coherencia = []
     for r in resultados:
@@ -256,14 +264,14 @@ def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
         if validar_coherencia_producto(nombre_raw, medicamento_norm):
             filtrados_coherencia.append(r)
         else:
-            logging.info(f"  ❌ Descartado por coherencia: {nombre_raw[:40]}... | vs {medicamento_norm}")
+            logger.info(f"  ❌ Descartado por coherencia: {nombre_raw[:40]}... | vs {medicamento_norm}")
     
     filtrados_precio = []
     for r in filtrados_coherencia:
         if validar_precio(r['precio'], medicamento_norm, conn):
             filtrados_precio.append(r)
         else:
-            logging.info(f"  ❌ Descartado por precio: ${r['precio']} - {r.get('nombre_raw', '')[:30]}")
+            logger.info(f"  ❌ Descartado por precio: ${r['precio']} - {r.get('nombre_raw', '')[:30]}")
     
     mejores = {}
     for r in filtrados_precio:
@@ -273,7 +281,7 @@ def get_precios(medicamento: str, horas: int = 24) -> List[Dict[str, Any]]:
     
     conn.close()
     final = list(mejores.values())
-    logging.info(f"✅ Resultados finales después de deduplicar: {len(final)}")
+    logger.info(f"✅ Resultados finales después de deduplicar: {len(final)}")
     return final
 
 def get_resumen(medicamento: str) -> List[Dict[str, Any]]:
@@ -303,13 +311,23 @@ def get_last_precios(medicamento: str, limit: int = 5) -> List[Dict[str, Any]]:
     conn.close()
     return [dict(row) for row in rows]
 
+# ============================================================
+# FUNCIÓN count_precios CORREGIDA
+# ============================================================
 def count_precios() -> int:
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT COUNT(*) FROM precios')
-    count = cursor.fetchone()[0]
+    row = cursor.fetchone()
     conn.close()
-    return count
+    if row is None:
+        return 0
+    if IS_PROD:
+        # PostgreSQL con row_factory=dict_row retorna un dict
+        return row.get('count', 0) or 0
+    else:
+        # SQLite retorna una tupla
+        return row[0] or 0
 
 def contar_por_fuente():
     conn = get_connection()
