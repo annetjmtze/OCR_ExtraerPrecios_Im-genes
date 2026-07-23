@@ -61,16 +61,10 @@ def init_db():
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_medicamento ON precios(medicamento)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_fecha ON precios(fecha)')
     
-    # --- Índice único para evitar duplicados (PostgreSQL) ---
-    if IS_PROD:
-        try:
-            cursor.execute("""
-                CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_precio_dia 
-                ON precios (medicamento, farmacia, (fecha::date))
-            """)
-            logger.info("✅ Índice único creado en PostgreSQL")
-        except Exception as e:
-            logger.warning(f"⚠️ No se pudo crear el índice único: {e}")
+    # --- ÍNDICE ÚNICO ELIMINADO (fecha::date NO es inmutable) ---
+    # La deduplicación se maneja en save_precio() con verificación de duplicados.
+    # Si deseas reforzar la deduplicación a nivel DB, usa un trigger o una función inmutable.
+    # Pero la verificación en código es suficiente y evita errores de transacción.
     
     # --- Tabla de rangos de precios ---
     cursor.execute('''
