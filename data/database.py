@@ -61,6 +61,18 @@ def init_db():
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_medicamento ON precios(medicamento)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_fecha ON precios(fecha)')
     
+    # --- Índice único para evitar duplicados (PostgreSQL) ---
+    if IS_PROD:
+        try:
+            cursor.execute("""
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_precio_dia 
+                ON precios (medicamento, farmacia, (fecha::date))
+            """)
+            logger.info("✅ Índice único creado en PostgreSQL")
+        except Exception as e:
+            logger.warning(f"⚠️ No se pudo crear el índice único: {e}")
+    
+    # --- Tabla de rangos de precios ---
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS rangos_precios (
             medicamento_generico TEXT PRIMARY KEY,
@@ -90,6 +102,7 @@ def init_db():
         )
     conn.commit()
     conn.close()
+    logger.info("📦 Base de datos inicializada correctamente")
 
 def normalizar_texto(texto: str) -> str:
     texto = texto.lower().strip()
@@ -98,10 +111,6 @@ def normalizar_texto(texto: str) -> str:
     return texto
 
 def normalizar_farmacia(nombre: str) -> str:
-    """
-    Normaliza el nombre de la farmacia para deduplicación (case-insensitive).
-    Extrae el nombre entre paréntesis si existe, elimina palabras comunes y convierte a minúsculas.
-    """
     if not nombre:
         return ""
     match = re.search(r'\(([^)]+)\)', nombre)
@@ -158,9 +167,6 @@ def validar_precio(precio: float, medicamento_generico: str, conn) -> bool:
             logger.warning(f"Precio excede límite absoluto para {medicamento_generico}: ${precio}")
             return False
 
-# ============================================================
-# VALIDACIÓN DE URL
-# ============================================================
 def es_url_valida(url: str) -> bool:
     if not url:
         return False
@@ -170,6 +176,9 @@ def es_url_valida(url: str) -> bool:
     except:
         return False
 
+# ============================================================
+# FUNCIÓN save_precio CON VERIFICACIÓN DE DUPLICADOS
+# ============================================================
 def save_precio(data: Dict[str, Any]):
     required = ['medicamento', 'farmacia', 'precio', 'fuente', 'fecha']
     for field in required:
@@ -191,6 +200,24 @@ def save_precio(data: Dict[str, Any]):
     conn = get_connection()
     cursor = conn.cursor()
     
+    # --- Verificar si ya existe un registro para el mismo medicamento, farmacia y fecha (sin hora) ---
+    fecha_dia = fecha_str[:10]  # YYYY-MM-DD
+    if IS_PROD:
+        cursor.execute(
+            "SELECT 1 FROM precios WHERE medicamento = %s AND farmacia = %s AND DATE(fecha) = %s LIMIT 1",
+            (data['medicamento'], data['farmacia'], fecha_dia)
+        )
+    else:
+        cursor.execute(
+            "SELECT 1 FROM precios WHERE medicamento = ? AND farmacia = ? AND DATE(fecha) = ? LIMIT 1",
+            (data['medicamento'], data['farmacia'], fecha_dia)
+        )
+    if cursor.fetchone():
+        logger.info(f"⚠️ Registro duplicado para {data['medicamento']} en {data['farmacia']} (fecha {fecha_dia}), omitiendo inserción.")
+        conn.close()
+        return
+    
+    # --- Insertar ---
     if IS_PROD:
         cursor.execute('''
             INSERT INTO precios (
@@ -311,9 +338,6 @@ def get_last_precios(medicamento: str, limit: int = 5) -> List[Dict[str, Any]]:
     conn.close()
     return [dict(row) for row in rows]
 
-# ============================================================
-# FUNCIÓN count_precios CORREGIDA
-# ============================================================
 def count_precios() -> int:
     conn = get_connection()
     cursor = conn.cursor()
@@ -323,10 +347,8 @@ def count_precios() -> int:
     if row is None:
         return 0
     if IS_PROD:
-        # PostgreSQL con row_factory=dict_row retorna un dict
         return row.get('count', 0) or 0
     else:
-        # SQLite retorna una tupla
         return row[0] or 0
 
 def contar_por_fuente():
